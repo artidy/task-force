@@ -1,6 +1,8 @@
 <?php
 
-namespace taskforce\logic;
+namespace AndreyPechennikov\TaskForce\logic;
+
+use DateTime;
 
 class AvailableActions
 {
@@ -22,7 +24,7 @@ class AvailableActions
     private ?int $clientId = null;
 
     private ?string $status = null;
-    private ?\DateTime $finishDate = null;
+    private ?DateTime $finishDate = null;
 
     /**
      * AvailableActionsStrategy constructor.
