@@ -2,6 +2,7 @@
 
 namespace AndreyPechennikov\TaskForce\logic;
 
+use AndreyPechennikov\TaskForce\exception\StatusActionException;
 use AndreyPechennikov\TaskForce\logic\actions\AbstractAction;
 use AndreyPechennikov\TaskForce\logic\actions\CancelAction;
 use AndreyPechennikov\TaskForce\logic\actions\CompleteAction;
@@ -49,8 +50,13 @@ class AvailableActions
         }
     }
 
+    /**
+     * @throws StatusActionException Выбрасывает исключение если переданной роли нет в доступных
+     */
     public function getAvailableActions(string $role, int $id): array
     {
+        $this->checkRole($role);
+
         $statusActions = $this->statusAllowedActions($this->status);
         $roleActions = $this->roleAllowedActions($role);
 
@@ -74,6 +80,9 @@ class AvailableActions
         return $map[$action] || null;
     }
 
+    /**
+     * @throws StatusActionException Выбрасывает исключение если переданного статуса нет в доступных
+     */
     public function setStatus(string $status): void
     {
         $availableStatuses = [
@@ -84,8 +93,21 @@ class AvailableActions
             self::STATUS_EXPIRED
         ];
 
-        if (in_array($status, $availableStatuses)) {
-            $this->status = $status;
+        if (!in_array($status, $availableStatuses)) {
+            throw new StatusActionException("Неизвестный статус: $status");
+        }
+
+        $this->status = $status;
+    }
+
+    /**
+     * @throws StatusActionException Выбрасывает исключение если переданной роли нет в доступных
+     */
+    private function checkRole(string $role): void {
+        $availableRoles = [self::ROLE_CLIENT, self::ROLE_PERFORMER];
+
+        if (!in_array($role, $availableRoles)) {
+            throw new StatusActionException("Неизвестная роль: $role");
         }
     }
 
