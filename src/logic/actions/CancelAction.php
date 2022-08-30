@@ -14,7 +14,7 @@ class CancelAction extends AbstractAction
         return 'cancel_action';
     }
 
-    public static function checkRights($userId, $performerId, $clientId): bool
+    public static function checkRights(int $userId, ?int$clientId, ?int $performerId): bool
     {
         return $userId === $clientId;
     }
