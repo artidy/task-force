@@ -24,7 +24,7 @@ class AvailableActions
     private ?int $clientId = null;
 
     private ?string $status = null;
-    private ?DateTime $finishDate = null;
+    private ?DateTime $deadline = null;
 
     /**
      * AvailableActionsStrategy constructor.
@@ -32,27 +32,27 @@ class AvailableActions
      * @param int|null $performerId
      * @param int $clientId
      */
-    public function __construct(string $status, ?int $performerId, int $clientId)
+    public function __construct(string $status, int $clientId, ?int $performerId)
     {
         $this->setStatus($status);
 
-        $this->performerId = $performerId;
         $this->clientId = $clientId;
+        $this->performerId = $performerId;
     }
 
-    public function setFinishDate(DateTime $dt): void
+    public function setDeadline(DateTime $deadline): void
     {
-        $curDate = new DateTime();
+        $currentDate = new DateTime();
 
-        if ($dt > $curDate) {
-            $this->finishDate = $dt;
+        if ($deadline > $currentDate) {
+            $this->deadline = $deadline;
         }
     }
 
-    public function getAvailableActions(string $role, int $id)
+    public function getAvailableActions(string $role, int $id): array
     {
-        $statusActions = $this->statusAllowedActions()[$this->status];
-        $roleActions = $this->roleAllowedActions()[$role];
+        $statusActions = $this->statusAllowedActions($this->status);
+        $roleActions = $this->roleAllowedActions($role);
         $rightRestrictions = $this->getRightsPairs();
 
         $allowedActions = array_intersect($statusActions, $roleActions);
@@ -78,8 +78,13 @@ class AvailableActions
 
     public function setStatus(string $status): void
     {
-        $availableStatuses = [self::STATUS_NEW, self::STATUS_IN_PROGRESS, self::STATUS_CANCEL, self::STATUS_COMPLETE,
-            self::STATUS_EXPIRED];
+        $availableStatuses = [
+            self::STATUS_NEW,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_CANCEL,
+            self::STATUS_COMPLETE,
+            self::STATUS_EXPIRED
+        ];
 
         if (in_array($status, $availableStatuses)) {
             $this->status = $status;
@@ -88,29 +93,32 @@ class AvailableActions
 
     /**
      * Возвращает действия, доступные для каждой роли
+     * @param string $role
      * @return array
      */
-    private function roleAllowedActions(): array
+    private function roleAllowedActions(string $role): array
     {
-        return [
+        $map = [
             self::ROLE_CLIENT => [self::ACTION_CANCEL, self::ACTION_COMPLETE],
             self::ROLE_PERFORMER => [self::ACTION_RESPONSE, self::ACTION_DENY]
         ];
+
+        return $map[$role] ?? [];
     }
 
     /**
      * Возвращает действия, доступные для каждого статуса
+     * @param string $status
      * @return array
      */
-    private function statusAllowedActions(): array
+    private function statusAllowedActions(string $status): array
     {
-        return [
-            self::STATUS_CANCEL => [],
-            self::STATUS_COMPLETE => [],
+        $map = [
             self::STATUS_IN_PROGRESS => [self::ACTION_DENY, self::ACTION_COMPLETE],
             self::STATUS_NEW => [self::ACTION_CANCEL, self::ACTION_RESPONSE],
-            self::STATUS_EXPIRED => []
         ];
+
+        return $map[$status] ?? [];
     }
 
     /**
