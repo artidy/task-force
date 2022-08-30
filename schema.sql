@@ -6,6 +6,14 @@ CREATE DATABASE task_force
 
 USE task_force;
 
+CREATE TABLE cities
+(
+    id            INT          AUTO_INCREMENT PRIMARY KEY,
+    title         VARCHAR(128) NOT NULL,
+    latitude      DOUBLE       NOT NULL,
+    longitude     DOUBLE       NOT NULL
+);
+
 CREATE TABLE users
 (
     id            INT          AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +46,8 @@ CREATE TABLE user_specializations
 CREATE TABLE categories
 (
     id            INT          AUTO_INCREMENT PRIMARY KEY,
-    title         VARCHAR(128) NOT NULL
+    title         VARCHAR(128) NOT NULL,
+    icon          VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE tasks
@@ -50,12 +59,13 @@ CREATE TABLE tasks
     client_id     INT          NOT NULL,
     status        VARCHAR(128) NOT NULL,
     performer_id  INT,
-    location      VARCHAR(128),
+    location_id   INT,
     budget        INT,
     deadline      DATETIME,
     FOREIGN KEY (category_id) REFERENCES categories (id),
     FOREIGN KEY (client_id) REFERENCES users (id),
-    FOREIGN KEY (performer_id) REFERENCES users (id)
+    FOREIGN KEY (performer_id) REFERENCES users (id),
+    FOREIGN KEY (location_id) REFERENCES cities (id)
 );
 
 CREATE TABLE files
