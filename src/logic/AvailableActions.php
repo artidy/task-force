@@ -2,6 +2,11 @@
 
 namespace AndreyPechennikov\TaskForce\logic;
 
+use AndreyPechennikov\TaskForce\logic\actions\AbstractAction;
+use AndreyPechennikov\TaskForce\logic\actions\CancelAction;
+use AndreyPechennikov\TaskForce\logic\actions\CompleteAction;
+use AndreyPechennikov\TaskForce\logic\actions\DenyAction;
+use AndreyPechennikov\TaskForce\logic\actions\ResponseAction;
 use DateTime;
 
 class AvailableActions
@@ -12,11 +17,6 @@ class AvailableActions
     const STATUS_COMPLETE = 'complete';
     const STATUS_EXPIRED = 'expired';
 
-    const ACTION_RESPONSE = 'action_response';
-    const ACTION_CANCEL = 'action_cancel';
-    const ACTION_DENY = 'action_deny';
-    const ACTION_COMPLETE = 'action_complete';
-
     const ROLE_PERFORMER = 'performer';
     const ROLE_CLIENT = 'customer';
 
@@ -24,7 +24,7 @@ class AvailableActions
     private ?int $clientId = null;
 
     private ?string $status = null;
-    private ?DateTime $finishDate = null;
+    private ?DateTime $deadline = null;
 
     /**
      * AvailableActionsStrategy constructor.
@@ -32,54 +32,57 @@ class AvailableActions
      * @param int|null $performerId
      * @param int $clientId
      */
-    public function __construct(string $status, ?int $performerId, int $clientId)
+    public function __construct(string $status, int $clientId, ?int $performerId)
     {
         $this->setStatus($status);
 
-        $this->performerId = $performerId;
         $this->clientId = $clientId;
+        $this->performerId = $performerId;
     }
 
-    public function setFinishDate(DateTime $dt): void
+    public function setDeadline(DateTime $deadline): void
     {
-        $curDate = new DateTime();
+        $currentDate = new DateTime();
 
-        if ($dt > $curDate) {
-            $this->finishDate = $dt;
+        if ($deadline > $currentDate) {
+            $this->deadline = $deadline;
         }
     }
 
-    public function getAvailableActions(string $role, int $id)
+    public function getAvailableActions(string $role, int $id): array
     {
-        $statusActions = $this->statusAllowedActions()[$this->status];
-        $roleActions = $this->roleAllowedActions()[$role];
-        $rightRestrictions = $this->getRightsPairs();
+        $statusActions = $this->statusAllowedActions($this->status);
+        $roleActions = $this->roleAllowedActions($role);
 
         $allowedActions = array_intersect($statusActions, $roleActions);
 
-        $allowedActions = array_filter($allowedActions, function ($action) use ($rightRestrictions, $id) {
-            return $rightRestrictions[$action]($id);
+        $allowedActions = array_filter($allowedActions, function (AbstractAction $action) use ($id) {
+            return $action->checkRights($id, $this->performerId, $this->clientId);
         });
 
         return array_values($allowedActions);
     }
 
-    public function getNextStatus(string $action)
+    public function getNextStatus(string $action): string|null
     {
         $map = [
-            self::ACTION_COMPLETE => self::STATUS_COMPLETE,
-            self::ACTION_CANCEL => self::STATUS_CANCEL,
-            self::ACTION_DENY => self::STATUS_CANCEL,
-            self::ACTION_RESPONSE => null
+            CompleteAction::getIdentifier() => self::STATUS_COMPLETE,
+            CancelAction::getIdentifier() => self::STATUS_CANCEL,
+            DenyAction::getIdentifier() => self::STATUS_CANCEL
         ];
 
-        return $map[$action];
+        return $map[$action] || null;
     }
 
     public function setStatus(string $status): void
     {
-        $availableStatuses = [self::STATUS_NEW, self::STATUS_IN_PROGRESS, self::STATUS_CANCEL, self::STATUS_COMPLETE,
-            self::STATUS_EXPIRED];
+        $availableStatuses = [
+            self::STATUS_NEW,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_CANCEL,
+            self::STATUS_COMPLETE,
+            self::STATUS_EXPIRED
+        ];
 
         if (in_array($status, $availableStatuses)) {
             $this->status = $status;
@@ -88,62 +91,42 @@ class AvailableActions
 
     /**
      * Возвращает действия, доступные для каждой роли
+     * @param string $role
      * @return array
      */
-    private function roleAllowedActions(): array
+    private function roleAllowedActions(string $role): array
     {
-        return [
-            self::ROLE_CLIENT => [self::ACTION_CANCEL, self::ACTION_COMPLETE],
-            self::ROLE_PERFORMER => [self::ACTION_RESPONSE, self::ACTION_DENY]
+        $map = [
+            self::ROLE_CLIENT => [CancelAction::class, CompleteAction::class],
+            self::ROLE_PERFORMER => [ResponseAction::class, DenyAction::class],
         ];
+
+        return $map[$role] ?? [];
     }
 
     /**
      * Возвращает действия, доступные для каждого статуса
+     * @param string $status
      * @return array
      */
-    private function statusAllowedActions(): array
+    private function statusAllowedActions(string $status): array
     {
-        return [
-            self::STATUS_CANCEL => [],
-            self::STATUS_COMPLETE => [],
-            self::STATUS_IN_PROGRESS => [self::ACTION_DENY, self::ACTION_COMPLETE],
-            self::STATUS_NEW => [self::ACTION_CANCEL, self::ACTION_RESPONSE],
-            self::STATUS_EXPIRED => []
+        $map = [
+            self::STATUS_IN_PROGRESS => [DenyAction::class, CompleteAction::class],
+            self::STATUS_NEW => [CancelAction::class, ResponseAction::class],
         ];
+
+        return $map[$status] ?? [];
     }
 
-    /**
-     * Проверяет доступность каждого действия для пользователя
-     * @return array
-     */
-    private function getRightsPairs(): array
+    private function getStatusMap(string $status): array
     {
-        return [
-            self::ACTION_RESPONSE => function ($id) {
-                return $id !== $this->performerId;
-            },
-            self::ACTION_DENY => function ($id) {
-                return $id == $this->performerId;
-            },
-            self::ACTION_CANCEL => function ($id) {
-                return $id == $this->clientId;
-            },
-            self::ACTION_COMPLETE => function($id) {
-                return $id == $this->clientId;
-            }
-        ];
-    }
-
-
-    private function getStatusMap(): array
-    {
-        return [
+        $map = [
             self::STATUS_NEW => [self::STATUS_EXPIRED, self::STATUS_CANCEL],
             self::STATUS_IN_PROGRESS => [self::STATUS_CANCEL, self::STATUS_COMPLETE],
-            self::STATUS_CANCEL => [],
-            self::STATUS_COMPLETE => [],
             self::STATUS_EXPIRED => [self::STATUS_CANCEL]
         ];
+
+        return $map[$status];
     }
 }

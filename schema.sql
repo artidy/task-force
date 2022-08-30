@@ -47,13 +47,15 @@ CREATE TABLE tasks
     title         VARCHAR(128) NOT NULL,
     description   VARCHAR(320) NOT NULL,
     category_id   INT          NOT NULL,
-    user_id       INT          NOT NULL,
+    client_id     INT          NOT NULL,
     status        VARCHAR(128) NOT NULL,
+    performer_id  INT,
     location      VARCHAR(128),
     budget        INT,
     deadline      DATETIME,
     FOREIGN KEY (category_id) REFERENCES categories (id),
-    FOREIGN KEY (user_id) REFERENCES users (id)
+    FOREIGN KEY (client_id) REFERENCES users (id),
+    FOREIGN KEY (performer_id) REFERENCES users (id)
 );
 
 CREATE TABLE files
