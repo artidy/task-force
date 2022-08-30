@@ -72,9 +72,9 @@ class AvailableActions
     public function getNextStatus(string $action): string|null
     {
         $map = [
-            CompleteAction::getIdentifier() => self::STATUS_COMPLETE,
-            CancelAction::getIdentifier() => self::STATUS_CANCEL,
-            DenyAction::getIdentifier() => self::STATUS_CANCEL
+            CompleteAction::class => self::STATUS_COMPLETE,
+            CancelAction::class => self::STATUS_CANCEL,
+            DenyAction::class => self::STATUS_CANCEL
         ];
 
         return $map[$action] || null;
