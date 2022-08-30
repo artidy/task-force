@@ -1,0 +1,15 @@
+{
+    "name": "andreypechennikov/task-force",
+    "autoload": {
+        "psr-4": {
+            "AndreyPechennikov\\TaskForce\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andrey Pechennikov",
+            "email": "ap@devandy.me"
+        }
+    ],
+    "require": {}
+}
