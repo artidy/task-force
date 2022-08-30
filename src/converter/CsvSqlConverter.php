@@ -68,7 +68,7 @@ class CsvSqlConverter
         foreach ($values as $value) {
             array_walk($value, function (&$value)
             {
-                $value = addcslashes($value);
+                $value = addslashes($value);
                 $value = "'$value'";
             });
 

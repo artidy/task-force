@@ -1,8 +1,9 @@
 <?php
 require_once 'vendor/autoload.php';
 
-use AndreyPechennikov\TaskForce\logic\AvailableActions;
-use AndreyPechennikov\TaskForce\logic\actions\CancelAction;
+use AndreyPechennikov\TaskForce\converter\CsvSqlConverter;
 
-$strategy = new AvailableActions(AvailableActions::STATUS_IN_PROGRESS, 5, 1);
-print($strategy->getNextStatus(CancelAction::class) == AvailableActions::STATUS_CANCEL);
+$converter = new CsvSqlConverter('data/csv');
+$result = $converter->convertFiles('data/sql');
+
+var_dump($result);
