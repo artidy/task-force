@@ -12,11 +12,12 @@ use Yii;
  * @property string $description
  * @property int $category_id
  * @property int $client_id
- * @property string $status
  * @property int|null $performer_id
  * @property int|null $location_id
  * @property int|null $budget
  * @property string|null $deadline
+ * @property int $status_id
+ * @property string|null $created_at
  *
  * @property CanceledTasks[] $canceledTasks
  * @property Categories $category
@@ -25,6 +26,7 @@ use Yii;
  * @property Cities $location
  * @property Users $performer
  * @property Reviews[] $reviews
+ * @property Statuses $status
  */
 class Tasks extends \yii\db\ActiveRecord
 {
@@ -42,11 +44,12 @@ class Tasks extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'description', 'category_id', 'client_id', 'status'], 'required'],
-            [['category_id', 'client_id', 'performer_id', 'location_id', 'budget'], 'integer'],
-            [['deadline'], 'safe'],
-            [['title', 'status'], 'string', 'max' => 128],
+            [['title', 'description', 'category_id', 'client_id', 'status_id'], 'required'],
+            [['category_id', 'client_id', 'performer_id', 'location_id', 'budget', 'status_id'], 'integer'],
+            [['deadline', 'created_at'], 'safe'],
+            [['title'], 'string', 'max' => 128],
             [['description'], 'string', 'max' => 320],
+            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::className(), 'targetAttribute' => ['status_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['client_id' => 'id']],
             [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['performer_id' => 'id']],
@@ -65,11 +68,12 @@ class Tasks extends \yii\db\ActiveRecord
             'description' => 'Description',
             'category_id' => 'Category ID',
             'client_id' => 'Client ID',
-            'status' => 'Status',
             'performer_id' => 'Performer ID',
             'location_id' => 'Location ID',
             'budget' => 'Budget',
             'deadline' => 'Deadline',
+            'status_id' => 'Status ID',
+            'created_at' => 'Created At',
         ];
     }
 
@@ -141,5 +145,15 @@ class Tasks extends \yii\db\ActiveRecord
     public function getReviews()
     {
         return $this->hasMany(Reviews::className(), ['task_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Status]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStatus()
+    {
+        return $this->hasOne(Statuses::className(), ['id' => 'status_id']);
     }
 }
