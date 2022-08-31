@@ -14,8 +14,8 @@ class m220831_071442_create_statuses_table extends Migration
     {
         $this->createTable('{{%statuses}}', [
             'id' => $this->primaryKey(),
-            'title' => $this->char()->notNull(),
-            'code' => $this->char()->notNull()
+            'title' => $this->string(128)->notNull(),
+            'code' => $this->string(128)->notNull()
         ]);
 
         $this->dropColumn('tasks', 'status');
@@ -30,7 +30,7 @@ class m220831_071442_create_statuses_table extends Migration
     {
         $this->dropForeignKey('status', 'tasks');
         $this->dropColumn('tasks', 'status_id');
-        $this->addColumn('tasks', 'status', $this->char()->notNull());
+        $this->addColumn('tasks', 'status', $this->string(128)->notNull());
         $this->dropTable('{{%statuses}}');
     }
 }
