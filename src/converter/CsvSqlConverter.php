@@ -9,6 +9,7 @@ use SplFileObject;
 
 class CsvSqlConverter
 {
+    protected ?string $databaseName = null;
     protected array $filesToConvert = [];
 
     /**
@@ -27,9 +28,10 @@ class CsvSqlConverter
     /**
      * @throws ConverterException
      */
-    public function convertFiles(string $outputDirectory): array
+    public function convertFiles(string $outputDirectory, string $databaseName): array
     {
         $result = [];
+        $this->databaseName = $databaseName;
 
         foreach ($this->filesToConvert as $file) {
             $result[] = $this->convertFile($file, $outputDirectory);
@@ -63,19 +65,28 @@ class CsvSqlConverter
     protected function getSqlContent(string $tableName, array $columns, array $values): string
     {
         $columnsString = implode(', ', $columns);
-        $sql = "INSERT INTO $tableName ($columnsString) VALUES";
+        $sql = "USE $this->databaseName;\n\nINSERT INTO $tableName ($columnsString)\nVALUES ";
+        $indent = '';
 
         foreach ($values as $value) {
+            if (trim(implode('', $value)) === "") {
+                continue;
+            }
+
             array_walk($value, function (&$value)
             {
+                $checkEmpty = $value;
                 $value = addslashes($value);
                 $value = "'$value'";
             });
 
-            $sql .= '( ' .implode(', ', $value) . '), ';
+            $sql .= $indent . '(' . implode(', ', $value) . "),\n";
+            $indent = '       ';
         }
 
-        return substr($sql, 0, -2);
+        $sql = substr($sql, 0, -2);
+
+        return "$sql;\n";
     }
 
     /**
