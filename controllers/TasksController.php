@@ -9,9 +9,9 @@ class TasksController extends Controller
 {
     public function actionIndex(): string
     {
-        $tasks = Tasks::findAll();
+        $tasks = Tasks::findAll(['status_id' => 1]);
 
-        return $this->render('index', ['tasks', $tasks]);
+        return $this->render('index', ['tasks' => $tasks]);
     }
 
 }
