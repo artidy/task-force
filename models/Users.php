@@ -76,9 +76,9 @@ class Users extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCanceledTasks()
+    public function getCanceledTasks(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(CanceledTasks::className(), ['user_id' => 'id']);
+        return $this->hasMany(CanceledTasks::class, ['user_id' => 'id']);
     }
 
     /**
@@ -119,5 +119,20 @@ class Users extends \yii\db\ActiveRecord
     public function getUserSpecializations()
     {
         return $this->hasMany(UserSpecializations::className(), ['user_id' => 'id']);
+    }
+
+    public function getRating(): ?float
+    {
+        $rating = null;
+
+        $opinionsCount = $this->getReviews()->count();
+
+        if ($opinionsCount) {
+            $ratingSum = $this->getReviews()->sum('rating');
+            $failCount = $this->getCanceledTasks()->count();
+            $rating = round(intdiv($ratingSum, $opinionsCount + $failCount), 2);
+        }
+
+        return $rating;
     }
 }

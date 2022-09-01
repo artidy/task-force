@@ -4,6 +4,7 @@ namespace app\models;
 
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "tasks".
@@ -179,6 +180,23 @@ class Tasks extends ActiveRecord
     public function getReviews(): ActiveQuery
     {
         return $this->hasMany(Reviews::class, ['task_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Replies]].
+     *
+     * @param IdentityInterface|null $user
+     * @return ActiveQuery
+     */
+    public function getReplies(IdentityInterface $user = null): ActiveQuery
+    {
+        $allRepliesQuery = $this->hasMany(Reply::class, ['task_id' => 'id']);
+
+        if ($user && $user->getId() !== $this->client_id) {
+            $allRepliesQuery->where(['replies.user_id' => $user->getId()]);
+        }
+
+        return $allRepliesQuery;
     }
 
     /**

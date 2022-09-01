@@ -1,12 +1,21 @@
 <?php
 /* @var $this yii\web\View
  * @var $task Tasks
+ * @var $user Users
+ * @var $newReply Reply
  */
 
+use app\helpers\UIHelper;
+use app\models\Reply;
 use app\models\Tasks;
+use app\models\Users;
 use yii\helpers\Html;
+use yii\helpers\Url;
+use function morphos\Russian\pluralize;
 
+$user = Yii::$app->user->getIdentity();
 ?>
+
 <div class="left-column">
     <div class="head-wrapper">
         <h3 class="head-main"><?= Html::encode($task->title); ?></h3>
@@ -17,76 +26,52 @@ use yii\helpers\Html;
     <a href="#" class="button button--orange action-btn" data-action="refusal">Отказаться от задания</a>
     <a href="#" class="button button--pink action-btn" data-action="completion">Завершить задание</a>
     <h4 class="head-regular">Отклики на задание</h4>
-    <div class="response-card">
-        <img class="customer-photo" src="<?= "assets/img/" . Html::encode($task->performer->avatar_path); ?>" width="146" height="156" alt="Фото заказчиков">
-        <div class="feedback-wrapper">
-            <a href="#" class="link link--block link--big">Астахов Павел</a>
-            <div class="response-wrapper">
-                <div class="stars-rating small"><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span>&nbsp;</span></div>
-                <p class="reviews">2 отзыва</p>
+    <?php $replies = $task->getReplies($user)->all();
+    foreach ($replies as $reply): ?>
+        <div class="response-card">
+            <img
+                class="customer-photo"
+                src="<?= "assets/img/" . Html::encode($reply->user->avatar_path); ?>"
+                width="146"
+                height="156"
+                alt="Фото заказчиков"
+            >
+            <div class="feedback-wrapper">
+                <a href="<?= Url::to(['user/view', 'id' => $reply->user_id]); ?>" class="link link--block link--big">
+                    <?= Html::encode($reply->user->name); ?>
+                </a>
+                <div class="response-wrapper">
+                    <?= UIHelper::showStarRating($reply->user->rating); ?>
+                    <?php $reviewsCount = $reply->user->getReviews()->count(); ?>
+                    <p class="reviews"><?= pluralize($reviewsCount, 'отзыв'); ?></p>
+                </div>
+                <p class="response-message">
+                    <?= Html::encode($reply->message); ?>
+                </p>
             </div>
-            <p class="response-message">
-                Могу сделать всё в лучшем виде. У меня есть необходимый опыт и инструменты.
-            </p>
-
-        </div>
-        <div class="feedback-wrapper">
-            <p class="info-text"><span class="current-time">25 минут </span>назад</p>
-            <p class="price price--small">3700 ₽</p>
-        </div>
-        <div class="button-popup">
-            <a href="#" class="button button--blue button--small">Принять</a>
-            <a href="#" class="button button--orange button--small">Отказать</a>
-        </div>
-    </div>
-    <div class="response-card">
-        <img class="customer-photo" src="img/man-sweater.png" width="146" height="156" alt="Фото заказчиков">
-        <div class="feedback-wrapper">
-            <a href="#" class="link link--block link--big">Дмитриев Андрей</a>
-            <div class="response-wrapper">
-                <div class="stars-rating small"><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span class="fill-star">&nbsp;</span><span>&nbsp;</span></div>
-                <p class="reviews">8 отзывов</p>
+            <div class="feedback-wrapper">
+                <p class="info-text"><?= Yii::$app->formatter->asRelativeTime($reply->created_at); ?></p>
+                <p class="price price--small"><?= Html::encode($reply->price); ?> ₽</p>
             </div>
-            <p class="response-message">
-                Примусь за выполнение задания в течение часа, сделаю быстро и качественно.
-            </p>
-
+            <div class="button-popup">
+                <a href="#" class="button button--blue button--small">Принять</a>
+                <a href="#" class="button button--orange button--small">Отказать</a>
+            </div>
         </div>
-        <div class="feedback-wrapper">
-            <p class="info-text"><span class="current-time">2 часа </span>назад</p>
-            <p class="price price--small">1999 ₽</p>
-        </div>
-        <div class="button-popup">
-            <a href="#" class="button button--blue button--small">Принять</a>
-            <a href="#" class="button button--orange button--small">Отказать</a>
-        </div>
-    </div>
+    <?php endforeach; ?>
 </div>
 <div class="right-column">
     <div class="right-card black info-card">
         <h4 class="head-card">Информация о задании</h4>
         <dl class="black-list">
             <dt>Категория</dt>
-            <dd>Уборка</dd>
+            <dd><?= Html::encode($task->category->title) ?></dd>
             <dt>Дата публикации</dt>
-            <dd>25 минут назад</dd>
+            <dd><?= Yii::$app->formatter->asRelativeTime($task->created_at); ?></dd>
             <dt>Срок выполнения</dt>
-            <dd>15 октября, 13:00</dd>
+            <dd><?= Yii::$app->formatter->asDatetime($task->deadline); ?></dd>
             <dt>Статус</dt>
-            <dd>Открыт для новых заказов</dd>
+            <dd><?= Html::encode($task->status->title); ?></dd>
         </dl>
-    </div>
-    <div class="right-card white file-card">
-        <h4 class="head-card">Файлы задания</h4>
-        <ul class="enumeration-list">
-            <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip">my_picture.jpg</a>
-                <p class="file-size">356 Кб</p>
-            </li>
-            <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip">information.docx</a>
-                <p class="file-size">12 Кб</p>
-            </li>
-        </ul>
     </div>
 </div>

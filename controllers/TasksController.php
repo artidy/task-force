@@ -3,12 +3,14 @@
 namespace app\controllers;
 
 use app\models\Categories;
+use app\models\Reply;
+use app\models\Reviews;
 use app\models\Tasks;
 use Yii;
 use yii\data\Pagination;
-use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 
-class TasksController extends Controller
+class TasksController extends SecuredController
 {
     public function actionIndex(): string
     {
@@ -30,4 +32,15 @@ class TasksController extends Controller
         ]);
     }
 
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionView($id): string
+    {
+        $task = $this->findOrDie($id, Tasks::class);
+        $reply = new Reply;
+        $reviews = new Reviews;
+
+        return $this->render('view', ['task' => $task, 'newReply' => $reply, 'reviews' => $reviews]);
+    }
 }
