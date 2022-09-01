@@ -30,7 +30,7 @@ class Statuses extends \yii\db\ActiveRecord
     {
         return [
             [['title', 'code'], 'required'],
-            [['title', 'code'], 'string', 'max' => 1],
+            [['title', 'code'], 'string', 'max' => 128],
         ];
     }
 

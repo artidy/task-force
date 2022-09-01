@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "tasks".
@@ -28,12 +29,16 @@ use Yii;
  * @property Reviews[] $reviews
  * @property Statuses $status
  */
-class Tasks extends \yii\db\ActiveRecord
+class Tasks extends ActiveRecord
 {
+    public bool $noResponses = false;
+    public bool $noLocation = false;
+    public string $filterPeriod = "";
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'tasks';
     }
@@ -41,7 +46,7 @@ class Tasks extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['title', 'description', 'category_id', 'client_id', 'status_id'], 'required'],
@@ -49,111 +54,140 @@ class Tasks extends \yii\db\ActiveRecord
             [['deadline', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 128],
             [['description'], 'string', 'max' => 320],
-            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::className(), 'targetAttribute' => ['status_id' => 'id']],
-            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['client_id' => 'id']],
-            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['performer_id' => 'id']],
-            [['location_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::className(), 'targetAttribute' => ['location_id' => 'id']],
+            [['noResponses', 'noLocation'], 'boolean'],
+            [['filterPeriod'], 'number'],
+            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::class, 'targetAttribute' => ['status_id' => 'id']],
+            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['performer_id' => 'id']],
+            [['location_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['location_id' => 'id']],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
-            'title' => 'Title',
-            'description' => 'Description',
-            'category_id' => 'Category ID',
-            'client_id' => 'Client ID',
-            'performer_id' => 'Performer ID',
-            'location_id' => 'Location ID',
-            'budget' => 'Budget',
-            'deadline' => 'Deadline',
-            'status_id' => 'Status ID',
-            'created_at' => 'Created At',
+            'title' => 'Заголовок',
+            'description' => 'Описание',
+            'category_id' => 'Категория',
+            'client_id' => 'Клиент',
+            'performer_id' => 'Роль',
+            'location_id' => 'Местоположение',
+            'budget' => 'Бюджет',
+            'deadline' => 'Дедлайн',
+            'status_id' => 'Статус',
+            'created_at' => 'Дата создания',
+            'noLocation' => 'Без локации',
+            'noResponses' => 'Без откликов',
         ];
+    }
+
+    public function getSearchQuery(): ActiveQuery
+    {
+        $query = self::find();
+        $query->joinWith('status s')->andWhere('s.code = "new"');
+
+        $query->andFilterWhere(['category_id' => $this->category_id]);
+
+        if ($this->noLocation) {
+            $query->andWhere('location_id IS NULL');
+        }
+
+        if ($this->noResponses) {
+            $query->joinWith('reviews r')->andWhere('r.id is NULL');
+        }
+
+        if ($this->filterPeriod) {
+            $query->andWhere(
+                'UNIX_TIMESTAMP(tasks.created_at) > UNIX_TIMESTAMP() - :period',
+                [':period' => $this->filterPeriod]
+            );
+        }
+
+        return $query->orderBy('created_at DESC');
     }
 
     /**
      * Gets query for [[CanceledTasks]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCanceledTasks()
+    public function getCanceledTasks(): ActiveQuery
     {
-        return $this->hasMany(CanceledTasks::className(), ['task_id' => 'id']);
+        return $this->hasMany(CanceledTasks::class, ['task_id' => 'id']);
     }
 
     /**
      * Gets query for [[Category]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCategory()
+    public function getCategory(): ActiveQuery
     {
-        return $this->hasOne(Categories::className(), ['id' => 'category_id']);
+        return $this->hasOne(Categories::class, ['id' => 'category_id']);
     }
 
     /**
      * Gets query for [[Client]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getClient()
+    public function getClient(): ActiveQuery
     {
-        return $this->hasOne(Users::className(), ['id' => 'client_id']);
+        return $this->hasOne(Users::class, ['id' => 'client_id']);
     }
 
     /**
      * Gets query for [[Files]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getFiles()
+    public function getFiles(): ActiveQuery
     {
-        return $this->hasMany(Files::className(), ['task_id' => 'id']);
+        return $this->hasMany(Files::class, ['task_id' => 'id']);
     }
 
     /**
      * Gets query for [[Location]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getLocation()
+    public function getLocation(): ActiveQuery
     {
-        return $this->hasOne(Cities::className(), ['id' => 'location_id']);
+        return $this->hasOne(Cities::class, ['id' => 'location_id']);
     }
 
     /**
      * Gets query for [[Performer]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPerformer()
+    public function getPerformer(): ActiveQuery
     {
-        return $this->hasOne(Users::className(), ['id' => 'performer_id']);
+        return $this->hasOne(Users::class, ['id' => 'performer_id']);
     }
 
     /**
      * Gets query for [[Reviews]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getReviews()
+    public function getReviews(): ActiveQuery
     {
-        return $this->hasMany(Reviews::className(), ['task_id' => 'id']);
+        return $this->hasMany(Reviews::class, ['task_id' => 'id']);
     }
 
     /**
      * Gets query for [[Status]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getStatus()
+    public function getStatus(): ActiveQuery
     {
-        return $this->hasOne(Statuses::className(), ['id' => 'status_id']);
+        return $this->hasOne(Statuses::class, ['id' => 'status_id']);
     }
 }
