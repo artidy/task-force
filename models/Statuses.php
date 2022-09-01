@@ -15,6 +15,12 @@ use Yii;
  */
 class Statuses extends \yii\db\ActiveRecord
 {
+    const STATUS_NEW = 'new';
+    const STATUS_IN_PROGRESS = 'proceed';
+    const STATUS_CANCEL = 'cancel';
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_EXPIRED = 'expired';
+
     /**
      * {@inheritdoc}
      */

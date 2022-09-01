@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Faker\Core\DateTime;
 use Yii;
 
 /**
@@ -12,8 +13,9 @@ use Yii;
  * @property string $description
  * @property int $rating
  * @property int $reviewer_id
+ * @property DateTime $created_at
  *
- * @property Users $reviewer
+ * @property User $reviewer
  * @property Tasks $task
  */
 class Reviews extends \yii\db\ActiveRecord
@@ -35,8 +37,8 @@ class Reviews extends \yii\db\ActiveRecord
             [['task_id', 'description', 'rating', 'reviewer_id'], 'required'],
             [['task_id', 'rating', 'reviewer_id'], 'integer'],
             [['description'], 'string', 'max' => 320],
-            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
-            [['reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['reviewer_id' => 'id']],
+            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::class, 'targetAttribute' => ['task_id' => 'id']],
+            [['reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['reviewer_id' => 'id']],
         ];
     }
 
@@ -49,6 +51,7 @@ class Reviews extends \yii\db\ActiveRecord
             'id' => 'ID',
             'task_id' => 'Task ID',
             'description' => 'Description',
+            'created_at' => 'Дата создания',
             'rating' => 'Rating',
             'reviewer_id' => 'Reviewer ID',
         ];
@@ -61,7 +64,7 @@ class Reviews extends \yii\db\ActiveRecord
      */
     public function getReviewer()
     {
-        return $this->hasOne(Users::className(), ['id' => 'reviewer_id']);
+        return $this->hasOne(User::className(), ['id' => 'reviewer_id']);
     }
 
     /**

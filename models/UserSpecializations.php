@@ -11,7 +11,7 @@ use Yii;
  * @property int $specialization_id
  *
  * @property Specializations $specialization
- * @property Users $user
+ * @property User $user
  */
 class UserSpecializations extends \yii\db\ActiveRecord
 {
@@ -31,7 +31,7 @@ class UserSpecializations extends \yii\db\ActiveRecord
         return [
             [['user_id', 'specialization_id'], 'required'],
             [['user_id', 'specialization_id'], 'integer'],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['specialization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Specializations::className(), 'targetAttribute' => ['specialization_id' => 'id']],
         ];
     }
@@ -64,6 +64,6 @@ class UserSpecializations extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 }

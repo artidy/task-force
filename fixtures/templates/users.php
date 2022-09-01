@@ -11,5 +11,6 @@ return [
     'avatar_path' => $faker->file('web/img', 'web/assets/img', false),
     'birthday' => $faker->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
     'phone_number' => substr($faker->e164PhoneNumber, 1, 11),
+    'description' => $faker->text(320),
     'registered_at' => $faker->dateTimeBetween('-10 years')->format('Y-m-d H:i:s'),
 ];
