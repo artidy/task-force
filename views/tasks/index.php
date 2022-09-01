@@ -1,86 +1,74 @@
 <?php
 /* @var $this yii\web\View
- * @var $tasks array<Tasks>
+ * @var $tasks Tasks[]
+ * @var $task_instance Tasks
+ * @var $pages Pagination
+ * @var $categories Categories[]
  */
 
+use app\models\Categories;
 use app\models\Tasks;
-use yii\helpers\BaseStringHelper;
+use yii\data\Pagination;
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\widgets\LinkPager;
 
 $this->title = 'Просмотр новых заданий';
 ?>
 <div class="left-column">
     <h3 class="head-main head-task">Новые задания</h3>
     <?php foreach ($tasks as $task): ?>
-        <div class="task-card">
-            <div class="header-task">
-                <a  href="#" class="link link--block link--big"><?= Html::encode($task->title); ?></a>
-                <p class="price price--task"><?= Html::encode($task->budget); ?> ₽</p>
-            </div>
-            <p class="info-text"><?= Yii::$app->formatter->asRelativeTime($task->created_at); ?></p>
-            <p class="task-text"><?= Html::encode(BaseStringHelper::truncate($task->description, 200)) ?></p>
-            <div class="footer-task">
-                <p class="info-text town-text"><?= Html::encode($task->location->title) ?></p>
-                <p class="info-text category-text"><?= Html::encode($task->category->title) ?></p>
-                <a href="#" class="button button--black">Смотреть Задание</a>
-            </div>
-        </div>
+        <?=$this->render('//partials/_task', ['task' => $task]); ?>
     <?php endforeach; ?>
     <div class="pagination-wrapper">
-        <ul class="pagination-list">
-            <li class="pagination-item mark">
-                <a href="#" class="link link--page"></a>
-            </li>
-            <li class="pagination-item">
-                <a href="#" class="link link--page">1</a>
-            </li>
-            <li class="pagination-item pagination-item--active">
-                <a href="#" class="link link--page">2</a>
-            </li>
-            <li class="pagination-item">
-                <a href="#" class="link link--page">3</a>
-            </li>
-            <li class="pagination-item mark">
-                <a href="#" class="link link--page"></a>
-            </li>
-        </ul>
+        <?= LinkPager::widget([
+            'pagination' => $pages,
+            'options' => ['class' => 'pagination-list'],
+            'prevPageCssClass' => 'pagination-item mark',
+            'nextPageCssClass' => 'pagination-item mark',
+            'pageCssClass' => 'pagination-item',
+            'activePageCssClass' => 'pagination-item--active',
+            'linkOptions' => ['class' => 'link link--page'],
+            'nextPageLabel' => '',
+            'prevPageLabel' => '',
+            'maxButtonCount' => 5
+        ]); ?>
     </div>
 </div>
 <div class="right-column">
     <div class="right-card black">
         <div class="search-form">
-            <form>
+            <?php $form = ActiveForm::begin(); ?>
                 <h4 class="head-card">Категории</h4>
-                <div class="form-group">
-                    <div class="checkbox-wrapper">
-                        <label class="control-label" for="сourier-services">
-                            <input type="checkbox" id="сourier-services" checked>
-                            Курьерские услуги</label>
-                        <label class="control-label" for="cargo-transportation">
-                            <input id="cargo-transportation" type="checkbox">
-                            Грузоперевозки</label>
-                        <label class="control-label" for="translations">
-                            <input id="translations" type="checkbox">
-                            Переводы</label>
-                    </div>
+                <div class="checkbox-wrapper">
+                    <?= Html::activeCheckboxList(
+                        $task_instance,
+                        'category_id',
+                        array_column($categories, 'title', 'id'),
+                        ['tag' => null, 'itemOptions' => ['labelOptions' => ['class' => 'control-label']]]);
+                    ?>
                 </div>
                 <h4 class="head-card">Дополнительно</h4>
-                <div class="form-group">
-                    <label class="control-label" for="without-performer">
-                        <input id="without-performer" type="checkbox" checked>
-                        Без исполнителя</label>
+                <div class="checkbox-wrapper">
+                    <?= $form->field($task_instance, 'noResponses')->
+                        checkbox(['labelOptions' => ['class' => 'control-label']]); ?>
+                </div>
+                <div class="checkbox-wrapper">
+                    <?= $form->field($task_instance, 'noLocation')->
+                        checkbox(['labelOptions' => ['class' => 'control-label']]); ?>
                 </div>
                 <h4 class="head-card">Период</h4>
-                <div class="form-group">
-                    <label for="period-value"></label>
-                    <select id="period-value">
-                        <option>1 час</option>
-                        <option>12 часов</option>
-                        <option>24 часа</option>
-                    </select>
+                <div class="checkbox-wrapper">
+                    <?= $form->field($task_instance, 'filterPeriod', ['template' => '{input}'])->
+                        dropDownList([
+                            '3600' => 'За последний час',
+                            '86400' => 'За сутки',
+                            '604800' => 'За неделю'
+                        ], ['prompt' => 'Выбрать']);
+                    ?>
                 </div>
                 <input type="submit" class="button button--blue" value="Искать">
-            </form>
+            <?php ActiveForm::end(); ?>
         </div>
     </div>
 </div>
