@@ -23,10 +23,8 @@ class m220901_110308_create_replies_table extends Migration
             'created_at' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
         ]);
 
-        $this->addColumn('tasks', 'reply_id', $this->integer());
-        $this->addForeignKey('replies_ibfk_1', 'tasks', 'reply_id', 'replies', 'id');
-        $this->addColumn('users', 'reply_id', $this->integer());
-        $this->addForeignKey('replies_ibfk_2', 'users', 'reply_id', 'replies', 'id');
+        $this->addForeignKey('replies_ibfk_1', 'replies', 'task_id', 'tasks', 'id');
+        $this->addForeignKey('replies_ibfk_2', 'replies', 'user_id', 'users', 'id');
     }
 
     /**
@@ -34,10 +32,8 @@ class m220901_110308_create_replies_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('replies_ibfk_2', 'users');
-        $this->dropColumn('users', 'reply_id');
-        $this->dropForeignKey('replies_ibfk_1', 'tasks');
-        $this->dropColumn('tasks', 'reply_id');
+        $this->dropForeignKey('replies_ibfk_2', 'replies');
+        $this->dropForeignKey('replies_ibfk_1', 'replies');
         $this->dropTable('{{%replies}}');
     }
 }
