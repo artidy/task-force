@@ -29,7 +29,7 @@ $this->title = 'Профиль пользователя';
             </div>
         </div>
         <p class="user-description">
-            <?= Html::encode($user->name); ?>
+            <?= Html::encode($user->description); ?>
         </p>
     </div>
     <div class="specialization-bio">

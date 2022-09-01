@@ -17,6 +17,7 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $name
  * @property int $is_performer
+ * @property string $description
  * @property string|null $avatar_path
  * @property string|null $birthday
  * @property string|null $phone_number
@@ -45,10 +46,10 @@ class User extends BasedUser
     public function rules(): array
     {
         return [
-            [['email', 'password', 'name', 'is_performer'], 'required'],
+            [['email', 'password', 'name', 'is_performer, description'], 'required'],
             [['is_performer'], 'integer'],
             [['birthday', 'registered_at'], 'safe'],
-            [['email', 'avatar_path'], 'string', 'max' => 320],
+            [['email', 'avatar_path, description'], 'string', 'max' => 320],
             [['password'], 'string', 'max' => 256],
             [['name'], 'string', 'max' => 128],
             [['phone_number'], 'string', 'max' => 11],
@@ -65,14 +66,15 @@ class User extends BasedUser
         return [
             'id' => 'ID',
             'email' => 'Email',
-            'password' => 'Password',
-            'name' => 'Name',
-            'is_performer' => 'Is Performer',
-            'avatar_path' => 'Avatar Path',
-            'birthday' => 'Birthday',
-            'phone_number' => 'Phone Number',
-            'telegram' => 'Telegram',
-            'registered_at' => 'Registered At',
+            'password' => 'Пароль',
+            'name' => 'Имя',
+            'is_performer' => 'Исполнитель',
+            'avatar_path' => 'Аватар',
+            'birthday' => 'Дата рождения',
+            'phone_number' => 'Номер телефона',
+            'telegram' => 'Телеграм',
+            'description' => 'Описание',
+            'registered_at' => 'Дата регистрации',
         ];
     }
 

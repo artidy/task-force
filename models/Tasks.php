@@ -192,9 +192,9 @@ class Tasks extends ActiveRecord
     {
         $allRepliesQuery = $this->hasMany(Reply::class, ['task_id' => 'id']);
 
-        if ($user && $user->getId() !== $this->client_id) {
-            $allRepliesQuery->where(['replies.user_id' => $user->getId()]);
-        }
+//        if ($user && $user->getId() !== $this->client_id) {
+//            $allRepliesQuery->where(['replies.user_id' => $user->getId()]);
+//        }
 
         return $allRepliesQuery;
     }
