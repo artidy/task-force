@@ -23,10 +23,10 @@ use yii\web\IdentityInterface;
  *
  * @property CanceledTasks[] $canceledTasks
  * @property Categories $category
- * @property Users $client
+ * @property User $client
  * @property Files[] $files
  * @property Cities $location
- * @property Users $performer
+ * @property User $performer
  * @property Reviews[] $reviews
  * @property Statuses $status
  */
@@ -59,8 +59,8 @@ class Tasks extends ActiveRecord
             [['filterPeriod'], 'number'],
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::class, 'targetAttribute' => ['status_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['performer_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
             [['location_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['location_id' => 'id']],
         ];
     }
@@ -139,7 +139,7 @@ class Tasks extends ActiveRecord
      */
     public function getClient(): ActiveQuery
     {
-        return $this->hasOne(Users::class, ['id' => 'client_id']);
+        return $this->hasOne(User::class, ['id' => 'client_id']);
     }
 
     /**
@@ -169,7 +169,7 @@ class Tasks extends ActiveRecord
      */
     public function getPerformer(): ActiveQuery
     {
-        return $this->hasOne(Users::class, ['id' => 'performer_id']);
+        return $this->hasOne(User::class, ['id' => 'performer_id']);
     }
 
     /**

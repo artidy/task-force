@@ -13,7 +13,7 @@ use Yii;
  * @property int $rating
  * @property int $reviewer_id
  *
- * @property Users $reviewer
+ * @property User $reviewer
  * @property Tasks $task
  */
 class Reviews extends \yii\db\ActiveRecord
@@ -36,7 +36,7 @@ class Reviews extends \yii\db\ActiveRecord
             [['task_id', 'rating', 'reviewer_id'], 'integer'],
             [['description'], 'string', 'max' => 320],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
-            [['reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['reviewer_id' => 'id']],
+            [['reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['reviewer_id' => 'id']],
         ];
     }
 
@@ -61,7 +61,7 @@ class Reviews extends \yii\db\ActiveRecord
      */
     public function getReviewer()
     {
-        return $this->hasOne(Users::className(), ['id' => 'reviewer_id']);
+        return $this->hasOne(User::className(), ['id' => 'reviewer_id']);
     }
 
     /**

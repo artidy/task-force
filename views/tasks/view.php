@@ -1,14 +1,14 @@
 <?php
 /* @var $this yii\web\View
  * @var $task Tasks
- * @var $user Users
+ * @var $user User
  * @var $newReply Reply
  */
 
 use app\helpers\UIHelper;
 use app\models\Reply;
 use app\models\Tasks;
-use app\models\Users;
+use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use function morphos\Russian\pluralize;

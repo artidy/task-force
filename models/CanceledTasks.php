@@ -13,7 +13,7 @@ use Yii;
  * @property int $user_id
  *
  * @property Tasks $task
- * @property Users $user
+ * @property User $user
  */
 class CanceledTasks extends \yii\db\ActiveRecord
 {
@@ -35,7 +35,7 @@ class CanceledTasks extends \yii\db\ActiveRecord
             [['task_id', 'user_id'], 'integer'],
             [['description'], 'string', 'max' => 320],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -69,6 +69,6 @@ class CanceledTasks extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 }

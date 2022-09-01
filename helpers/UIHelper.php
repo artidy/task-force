@@ -8,7 +8,7 @@ use AndreyPechennikov\TaskForce\logic\actions\DenyAction;
 use AndreyPechennikov\TaskForce\logic\actions\ResponseAction;
 use AndreyPechennikov\TaskForce\logic\AvailableActions;
 use app\models\Tasks;
-use app\models\Users;
+use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -32,7 +32,7 @@ class UIHelper
         return Html::tag('div', $stars, ['class' => $className]);
     }
 
-    public static function getActionButtons(Tasks $task, Users $user): array
+    public static function getActionButtons(Tasks $task, User $user): array
     {
         $buttons = [];
 
