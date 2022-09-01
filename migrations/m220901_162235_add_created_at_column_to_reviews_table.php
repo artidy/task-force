@@ -12,6 +12,7 @@ class m220901_162235_add_created_at_column_to_reviews_table extends Migration
      */
     public function safeUp()
     {
+        $this->addColumn('{{%reviews}}', 'created_at', $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'));
     }
 
     /**
@@ -19,5 +20,6 @@ class m220901_162235_add_created_at_column_to_reviews_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropColumn('{{%reviews}}', 'created_at');
     }
 }
