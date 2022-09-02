@@ -62,8 +62,8 @@ class AvailableActions
 
         $allowedActions = array_intersect($statusActions, $roleActions);
 
-        $allowedActions = array_filter($allowedActions, function (AbstractAction $action) use ($id) {
-            return $action->checkRights($id, $this->clientId, $this->performerId);
+        $allowedActions = array_filter($allowedActions, function (string $action) use ($id) {
+            return $action::checkRights($id, $this->clientId, $this->performerId);
         });
 
         return array_values($allowedActions);

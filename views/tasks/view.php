@@ -1,5 +1,5 @@
 <?php
-/* @var $this yii\web\View
+/* @var $this View
  * @var $task Tasks
  * @var $user User
  * @var $newReply Reply
@@ -11,6 +11,8 @@ use app\models\Tasks;
 use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\View;
+
 use function morphos\Russian\pluralize;
 
 $user = Yii::$app->user->getIdentity();
@@ -22,9 +24,10 @@ $user = Yii::$app->user->getIdentity();
         <p class="price price--big"><?= $task->budget ? Html::encode($task->budget) . "₽" : ""; ?></p>
     </div>
     <p class="task-description"><?= Html::encode($task->description); ?></p>
-    <a href="#" class="button button--blue action-btn" data-action="act_response">Откликнуться на задание</a>
-    <a href="#" class="button button--orange action-btn" data-action="refusal">Отказаться от задания</a>
-    <a href="#" class="button button--pink action-btn" data-action="completion">Завершить задание</a>
+    <?php foreach (UIHelper::getActionButtons($task, $user) as $button) {
+            echo $button;
+        }
+    ?>
     <h4 class="head-regular">Отклики на задание</h4>
     <?php $replies = $task->getReplies($user)->all();
     foreach ($replies as $reply): ?>

@@ -46,19 +46,19 @@ class UIHelper
         $roleName = $user->is_performer ? AvailableActions::ROLE_PERFORMER : AvailableActions::ROLE_CLIENT;
 
         try {
-            $availableActionsManger = new AvailableActions($task->status->code, $task->performer_id, $task->client_id);
+            $availableActionsManger = new AvailableActions($task->status->code, $task->client_id, $task->performer_id);
             $actions = $availableActionsManger->getAvailableActions($roleName, $user->id);
 
             foreach ($actions as $action) {
-                $color = $colorsMap[$action::getInternalName()];
+                $color = $colorsMap[$action::getIdentifier()];
                 $label = $action::getLabel();
 
                 $options = [
-                    'data-action' => $action::getInternalName(),
+                    'data-action' => $action::getIdentifier(),
                     'class' => 'button action-btn button--' . $color
                 ];
 
-                if ($action::getInternalName() === 'act_cancel') {
+                if ($action::getIdentifier() === 'act_cancel') {
                     $options['href'] = Url::to(['tasks/cancel', 'id' => $task->id]);
                 }
 

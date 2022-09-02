@@ -16,6 +16,6 @@ class ResponseAction extends AbstractAction
 
     public static function checkRights(int $userId, ?int$clientId, ?int $performerId): bool
     {
-        return $userId === $performerId;
+        return $performerId === null;
     }
 }
