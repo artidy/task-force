@@ -241,4 +241,12 @@ class User extends BasedUser
 
         return $result;
     }
+
+    public function addCanceledTask(int $task_id, string $description)
+    {
+        $canceledTask = new CanceledTasks();
+        $canceledTask->task_id = $task_id;
+        $canceledTask->description = $description;
+        $canceledTask->user_id = $this->id;
+    }
 }

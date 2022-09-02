@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use AndreyPechennikov\TaskForce\logic\actions\CancelAction;
+use AndreyPechennikov\TaskForce\logic\actions\DenyAction;
 use app\models\Categories;
 use app\models\Cities;
 use app\models\Files;
@@ -12,6 +14,7 @@ use app\models\User;
 use Yii;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UploadedFile;
 
 class TasksController extends SecuredController
@@ -45,7 +48,7 @@ class TasksController extends SecuredController
         $reply = new Reply;
         $reviews = new Reviews;
 
-        return $this->render('view', ['task' => $task, 'newReply' => $reply, 'reviews' => $reviews]);
+        return $this->render('view', ['task' => $task, 'newReply' => $reply, 'review' => $reviews]);
     }
 
     public function actionCreate()
@@ -83,5 +86,37 @@ class TasksController extends SecuredController
 
             return $this->asJson($model->getAttributes());
         }
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionCancel($id): Response
+    {
+        /**
+         * @var Tasks $task
+         */
+        $task = $this->findOrDie($id, Tasks::class);
+        $task->goToNextStatus(new CancelAction);
+
+        return $this->redirect(['tasks/view', 'id' => $task->id]);
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionDeny($id): Response
+    {
+        /**
+         * @var Tasks $task
+         */
+        $task = $this->findOrDie($id, Tasks::class);
+        $task->goToNextStatus(new DenyAction());
+
+        $performer = $task->performer;
+
+        $performer->addCanceledTask($task->id, 'Отменил по собственному желанию');
+
+        return $this->redirect(['tasks/view', 'id' => $task->id]);
     }
 }
