@@ -8,6 +8,7 @@ use app\models\Files;
 use app\models\Reply;
 use app\models\Reviews;
 use app\models\Tasks;
+use app\models\User;
 use Yii;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;

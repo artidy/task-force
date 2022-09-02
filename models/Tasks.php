@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -45,6 +46,17 @@ class Tasks extends ActiveRecord
         return 'tasks';
     }
 
+    public function behaviors(): array
+    {
+        return [
+            [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'client_id',
+                'updatedByAttribute' => null
+            ]
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -54,8 +66,8 @@ class Tasks extends ActiveRecord
             [['status_id'], 'default', 'value' => function($model, $attr) {
                 return Statuses::find()->select('id')->where('id=1')->scalar();
             }],
-            [['title', 'description', 'category_id', 'client_id', 'status_id'], 'required'],
-            [['category_id', 'client_id', 'performer_id', 'location_id', 'budget', 'status_id'], 'integer'],
+            [['title', 'description', 'category_id', 'status_id'], 'required'],
+            [['category_id', 'performer_id', 'location_id', 'budget', 'status_id'], 'integer'],
             [['deadline', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 128],
             [['budget'], 'integer', 'min' => 1],
@@ -66,7 +78,6 @@ class Tasks extends ActiveRecord
             [['deadline'], 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'minString' => 'чем текущий день'],
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::class, 'targetAttribute' => ['status_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['client_id' => 'id']],
             [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
             [['location_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['location_id' => 'id']],
         ];
