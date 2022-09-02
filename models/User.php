@@ -7,7 +7,6 @@ use Exception;
 use Yii;
 use PDO;
 use yii\db\ActiveQuery;
-use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -18,6 +17,7 @@ use yii\web\IdentityInterface;
  * @property string $name
  * @property int $is_performer
  * @property string $description
+ * @property int $city_id
  * @property string|null $avatar_path
  * @property string|null $birthday
  * @property string|null $phone_number
@@ -27,7 +27,7 @@ use yii\web\IdentityInterface;
  * @property CanceledTasks[] $canceledTasks
  * @property Reviews[] $reviews
  * @property Tasks[] $tasks
- * @property Tasks[] $tasks0
+ * @property Tasks[] $assignedTasks
  * @property UserSpecializations[] $userSpecializations
  */
 class User extends BasedUser
@@ -46,8 +46,8 @@ class User extends BasedUser
     public function rules(): array
     {
         return [
-            [['email', 'password', 'name', 'is_performer, description'], 'required'],
-            [['is_performer'], 'integer'],
+            [['email', 'password', 'name', 'is_performer, description, city_id'], 'required'],
+            [['is_performer, city_id'], 'integer'],
             [['birthday', 'registered_at'], 'safe'],
             [['email', 'avatar_path, description'], 'string', 'max' => 320],
             [['password'], 'string', 'max' => 256],
@@ -55,6 +55,7 @@ class User extends BasedUser
             [['phone_number'], 'string', 'max' => 11],
             [['telegram'], 'string', 'max' => 64],
             [['email'], 'unique'],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['city_id' => 'id']],
         ];
     }
 
@@ -73,7 +74,8 @@ class User extends BasedUser
             'birthday' => 'Дата рождения',
             'phone_number' => 'Номер телефона',
             'telegram' => 'Телеграм',
-            'description' => 'Описание',
+            'description' => 'Дополнительная информация',
+            'city_id' => 'Местоположение',
             'registered_at' => 'Дата регистрации',
         ];
     }
@@ -109,13 +111,23 @@ class User extends BasedUser
     }
 
     /**
-     * Gets query for [[getAssignedTasks]].
+     * Gets query for [[AssignedTasks]].
      *
      * @return ActiveQuery
      */
     public function getAssignedTasks(): ActiveQuery
     {
         return $this->hasMany(Tasks::class, ['performer_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[City]].
+     *
+     * @return ActiveQuery
+     */
+    public function getCity(): ActiveQuery
+    {
+        return $this->hasOne(Cities::class, ['city_id' => 'id']);
     }
 
     /**
