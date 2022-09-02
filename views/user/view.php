@@ -1,4 +1,8 @@
 <?php
+/**
+ * @var User $user
+ * @var View $this
+ */
 
 use app\helpers\UIHelper;
 use app\models\User;
@@ -7,10 +11,6 @@ use yii\helpers\Url;
 use yii\web\View;
 
 $this->title = 'Профиль пользователя';
-/**
- * @var User $user
- * @var View $this
- */
 ?>
 
 <div class="left-column">
