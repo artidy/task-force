@@ -3,15 +3,19 @@
  * @var $task Tasks
  * @var $user User
  * @var $newReply Reply
+ * @var $review Reviews
  */
 
 use app\helpers\UIHelper;
 use app\models\Reply;
+use app\models\Reviews;
 use app\models\Tasks;
 use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+
+use yii\widgets\ActiveForm;
 
 use function morphos\Russian\pluralize;
 
@@ -84,3 +88,65 @@ $user = Yii::$app->user->getIdentity();
         </dl>
     </div>
 </div>
+<section class="pop-up pop-up--deny_action pop-up--close">
+    <div class="pop-up--wrapper">
+        <h4>Отказ от задания</h4>
+        <p class="pop-up-text">
+            <b>Внимание!</b><br>
+            Вы собираетесь отказаться от выполнения этого задания.<br>
+            Это действие плохо скажется на вашем рейтинге и увеличит счетчик проваленных заданий.
+        </p>
+        <a class="button button--pop-up button--orange" href="<?=Url::to(['tasks/deny', 'id' => $task->id]); ?>">Отказаться</a>
+        <div class="button-container">
+            <button class="button--close" type="button">Закрыть окно</button>
+        </div>
+    </div>
+</section>
+<section class="pop-up pop-up--complete_action pop-up--close">
+    <div class="pop-up--wrapper">
+        <h4>Завершение задания</h4>
+        <p class="pop-up-text">
+            Вы собираетесь отметить это задание как выполненное.
+            Пожалуйста, оставьте отзыв об исполнителе и отметьте отдельно, если возникли проблемы.
+        </p>
+        <div class="completion-form pop-up--form regular-form">
+            <?php $form = ActiveForm::begin([
+                'action' => Url::to(['review/create', 'task' => $task->id]),
+                'enableAjaxValidation' => true,
+                'validationUrl' => ['review/validate'],
+            ]); ?>
+                <?= $form->field($review, 'description')->textarea(); ?>
+                <?= $form->field($review, 'rating', ['template' => '{label}{input}' .
+                    UIHelper::showStarRating(0, 'big', 5, true) . '{error}'])
+                    ->hiddenInput(); ?>
+                <input type="submit" class="button button--pop-up button--blue" value="Завершить">
+            <?php ActiveForm::end(); ?>
+        </div>
+        <div class="button-container">
+            <button class="button--close" type="button">Закрыть окно</button>
+        </div>
+    </div>
+</section>
+<section class="pop-up pop-up--response_action pop-up--close">
+    <div class="pop-up--wrapper">
+        <h4>Добавление отклика к заданию</h4>
+        <p class="pop-up-text">
+            Вы собираетесь оставить свой отклик к этому заданию.
+            Пожалуйста, укажите стоимость работы и добавьте комментарий, если необходимо.
+        </p>
+        <div class="addition-form pop-up--form regular-form">
+            <?php $form = ActiveForm::begin(['enableAjaxValidation' => true,
+                    'validationUrl' => ['reply/validate', 'task' => $task->id],
+                    'action' => Url::to(['reply/create', 'task' => $task->id])]
+                );
+            ?>
+                <?= $form->field($newReply, 'message')->textarea(); ?>
+                <?= $form->field($newReply, 'price'); ?>
+                <input type="submit" class="button button--pop-up button--blue" value="Отправить">
+            <?php ActiveForm::end(); ?>
+        </div>
+        <div class="button-container">
+            <button class="button--close" type="button">Закрыть окно</button>
+        </div>
+    </div>
+</section>

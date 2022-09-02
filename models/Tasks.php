@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use AndreyPechennikov\TaskForce\logic\actions\AbstractAction;
+use AndreyPechennikov\TaskForce\logic\AvailableActions;
 use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -225,5 +227,15 @@ class Tasks extends ActiveRecord
     public function getStatus(): ActiveQuery
     {
         return $this->hasOne(Statuses::class, ['id' => 'status_id']);
+    }
+
+    public function goToNextStatus(AbstractAction $action)
+    {
+        $actionManager = new AvailableActions($this->status->code, $this->performer_id, $this->client_id);
+        $nextStatusName = $actionManager->getNextStatus($action::class);
+
+        $status = Statuses::findOne(['code' => $nextStatusName]);
+        $this->link('status', $status);
+        $this->save();
     }
 }
