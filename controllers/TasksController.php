@@ -4,12 +4,14 @@ namespace app\controllers;
 
 use app\models\Categories;
 use app\models\Cities;
+use app\models\Files;
 use app\models\Reply;
 use app\models\Reviews;
 use app\models\Tasks;
 use Yii;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 class TasksController extends SecuredController
 {
@@ -67,5 +69,18 @@ class TasksController extends SecuredController
         }
 
         return $this->render('create', ['task' => $task, 'categories' => $categories, 'cities' => $cities]);
+    }
+
+    public function actionUpload()
+    {
+        if (Yii::$app->request->isPost) {
+            $model = new Files();
+            $model->task_uid = Yii::$app->session->get('task_uid');
+            $model->file = UploadedFile::getInstanceByName('file');
+
+            $model->upload();
+
+            return $this->asJson($model->getAttributes());
+        }
     }
 }

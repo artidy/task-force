@@ -20,6 +20,7 @@ use yii\web\IdentityInterface;
  * @property string|null $deadline
  * @property int $status_id
  * @property string|null $created_at
+ * @property string|null $uid
  *
  * @property CanceledTasks[] $canceledTasks
  * @property Categories $category
@@ -50,13 +51,19 @@ class Tasks extends ActiveRecord
     public function rules(): array
     {
         return [
+            [['status_id'], 'default', 'value' => function($model, $attr) {
+                return Statuses::find()->select('id')->where('id=1')->scalar();
+            }],
             [['title', 'description', 'category_id', 'client_id', 'status_id'], 'required'],
             [['category_id', 'client_id', 'performer_id', 'location_id', 'budget', 'status_id'], 'integer'],
             [['deadline', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 128],
+            [['budget'], 'integer', 'min' => 1],
             [['description'], 'string', 'max' => 320],
+            [['uid'], 'string', 'max' => 64],
             [['noResponses', 'noLocation'], 'boolean'],
             [['filterPeriod'], 'number'],
+            [['deadline'], 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'minString' => 'чем текущий день'],
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::class, 'targetAttribute' => ['status_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['client_id' => 'id']],
@@ -143,13 +150,13 @@ class Tasks extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Files]].
+     * Gets query for [[File]].
      *
      * @return ActiveQuery
      */
     public function getFiles(): ActiveQuery
     {
-        return $this->hasMany(Files::class, ['task_id' => 'id']);
+        return $this->hasMany(Files::class, ['task_uid' => 'uid']);
     }
 
     /**

@@ -10,10 +10,9 @@ class DropzoneAsset extends AssetBundle
     public $baseUrl = '@web/vendor/dropzone';
 
     public $css = [
-        'basic.css',
-        'dropzone.css',
+        '/css/dropzone.min.css',
     ];
     public $js = [
-        'dropzone.min.js'
+        '/js/dropzone.min.js'
     ];
 }
