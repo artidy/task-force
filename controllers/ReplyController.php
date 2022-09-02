@@ -57,7 +57,7 @@ class ReplyController extends SecuredController
     {
         $reply = $this->findOrDie($id, Reply::class);
 
-        $reply->is_denied = true;
+        $reply->is_denied = 1;
         $reply->save();
 
         return $this->redirect(['tasks/view', 'id' => $reply->task_id]);
@@ -68,11 +68,11 @@ class ReplyController extends SecuredController
         $reply = $this->findOrDie($id, Reply::class);
         $task = $reply->task;
 
-        $reply->is_accept = true;
+        $reply->is_accept = 1;
         $reply->save();
 
         $task->performer_id = $reply->user_id;
-        $task->status_id = Statuses::STATUS_IN_PROGRESS;
+        $task->status_id = Statuses::findByCode(Statuses::STATUS_IN_PROGRESS)->id;
         $task->save();
 
         return $this->redirect(['tasks/view', 'id' => $reply->task_id]);

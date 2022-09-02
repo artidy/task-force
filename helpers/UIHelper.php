@@ -58,7 +58,7 @@ class UIHelper
                     'class' => 'button action-btn button--' . $color
                 ];
 
-                if ($action::getIdentifier() === 'act_cancel') {
+                if ($action::getIdentifier() === 'cancel_action') {
                     $options['href'] = Url::to(['tasks/cancel', 'id' => $task->id]);
                 }
 

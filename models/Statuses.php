@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "statuses".
@@ -24,7 +25,7 @@ class Statuses extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'statuses';
     }
@@ -32,7 +33,7 @@ class Statuses extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['title', 'code'], 'required'],
@@ -43,7 +44,7 @@ class Statuses extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -55,10 +56,21 @@ class Statuses extends \yii\db\ActiveRecord
     /**
      * Gets query for [[Tasks]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getTasks()
     {
-        return $this->hasMany(Tasks::className(), ['status_id' => 'id']);
+        return $this->hasMany(Tasks::class, ['status_id' => 'id']);
+    }
+
+    /**
+     * Finds status by code
+     *
+     * @param string $code
+     * @return Statuses
+     */
+    public static function findByCode(string $code): static
+    {
+        return static::findOne(['code' => $code]);
     }
 }

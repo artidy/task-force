@@ -77,7 +77,7 @@ class AvailableActions
             DenyAction::class => self::STATUS_CANCEL
         ];
 
-        return $map[$action] || null;
+        return $map[$action] ?? null;
     }
 
     /**

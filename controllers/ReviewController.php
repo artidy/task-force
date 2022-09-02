@@ -27,7 +27,7 @@ class ReviewController extends SecuredController
             $review->load(Yii::$app->request->post());
 
             if ($review->validate()) {
-                $task->link('opinions', $review);
+                $task->link('reviews', $review);
                 $task->goToNextStatus(new CompleteAction);
             }
         }
