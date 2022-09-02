@@ -8,6 +8,7 @@ use Yii;
 use PDO;
 use yii\db\ActiveQuery;
 use yii\web\IdentityInterface;
+use yii\web\UploadedFile;
 
 /**
  * This is the model class for table "users".
@@ -17,21 +18,35 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $name
  * @property int $is_performer
- * @property string $description
+ * @property string|null $description
+ * @property int $city_id
  * @property string|null $avatar_path
  * @property string|null $birthday
  * @property string|null $phone_number
  * @property string|null $telegram
  * @property string|null $registered_at
+ * @property boolean $hide_contacts
  *
  * @property CanceledTasks[] $canceledTasks
  * @property Reviews[] $reviews
  * @property Tasks[] $tasks
- * @property Tasks[] $tasks0
+ * @property Tasks[] $assignedTasks
  * @property UserSpecializations[] $userSpecializations
+ * @property Cities $city
  */
 class User extends BasedUser
 {
+    public string $password_repeat = '';
+
+    public string $old_password = '';
+    public string $new_password = '';
+    public string $new_password_repeat = '';
+
+    /**
+     * @var ?UploadedFile
+     */
+    public ?UploadedFile $avatarFile = null;
+
     /**
      * {}
      */
@@ -46,15 +61,24 @@ class User extends BasedUser
     public function rules(): array
     {
         return [
-            [['email', 'password', 'name', 'is_performer, description'], 'required'],
-            [['is_performer'], 'integer'],
-            [['birthday', 'registered_at'], 'safe'],
-            [['email', 'avatar_path, description'], 'string', 'max' => 320],
-            [['password'], 'string', 'max' => 256],
-            [['name'], 'string', 'max' => 128],
-            [['phone_number'], 'string', 'max' => 11],
-            [['telegram'], 'string', 'max' => 64],
+            [['city_id', 'password'], 'required', 'on' => 'insert'],
+            [['new_password'], 'required', 'when' => function ($model) {
+                return $model->old_password;
+            }],
+            [['password_repeat', 'categories', 'old_password', 'new_password', 'new_password_repeat'], 'safe'],
+            [['avatarFile'], 'file', 'mimeTypes' => ['image/jpeg', 'image/png'], 'extensions' => ['png', 'jpg', 'jpeg']],
+            [['password'], 'compare', 'on' => 'insert'],
+            [['new_password'], 'compare', 'on' => 'update'],
+            [['registered_at'], 'date', 'format' => 'php:Y-m-d',],
+            [['is_performer', 'hide_contacts'], 'boolean'],
+            [['phone_number'], 'match', 'pattern' => '/^[+-]?\d{11}$/', 'message' => 'Номер телефона должен быть строкой в 11 символов'],
+            [['email', 'name'], 'string', 'max' => 255],
+            [['description'], 'string'],
+            [['phone_number'], 'number'],
+            [['password', 'telegram'], 'string', 'max' => 64],
             [['email'], 'unique'],
+            [['email'], 'email'],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['city_id' => 'id']],
         ];
     }
 
@@ -73,8 +97,14 @@ class User extends BasedUser
             'birthday' => 'Дата рождения',
             'phone_number' => 'Номер телефона',
             'telegram' => 'Телеграм',
-            'description' => 'Описание',
+            'description' => 'Дополнительная информация',
+            'city_id' => 'Местоположение',
             'registered_at' => 'Дата регистрации',
+            'hide_contacts' => 'Показывать контакты только заказчику',
+            'old_password' => 'Старый пароль',
+            'new_password' => 'Новый пароль',
+            'password_repeat' => 'Повтор пароля',
+            'new_password_repeat' => 'Повтор пароля',
         ];
     }
 
@@ -101,7 +131,7 @@ class User extends BasedUser
     /**
      * Gets query for [[Tasks]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getTasks()
     {
@@ -109,13 +139,23 @@ class User extends BasedUser
     }
 
     /**
-     * Gets query for [[getAssignedTasks]].
+     * Gets query for [[AssignedTasks]].
      *
      * @return ActiveQuery
      */
     public function getAssignedTasks(): ActiveQuery
     {
         return $this->hasMany(Tasks::class, ['performer_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[City]].
+     *
+     * @return ActiveQuery
+     */
+    public function getCity(): ActiveQuery
+    {
+        return $this->hasOne(Cities::class, ['city_id' => 'id']);
     }
 
     /**
@@ -144,7 +184,7 @@ class User extends BasedUser
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
     public function getRatingPosition(): int|string|null
     {
@@ -191,8 +231,14 @@ class User extends BasedUser
             where(['statuses.id' => Statuses::STATUS_IN_PROGRESS])->exists();
     }
 
-    public function isContactsAllowed(): bool
+    public function isContactsAllowed(IdentityInterface $user)
     {
-        return $this->getAssignedTasks()->exists();
+        $result = true;
+
+        if ($this->hide_contacts) {
+            $result = $this->getAssignedTasks($user)->exists();
+        }
+
+        return $result;
     }
 }
