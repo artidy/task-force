@@ -2,59 +2,111 @@
 
 namespace app\models;
 
-use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\web\UploadedFile;
 
 /**
  * This is the model class for table "files".
  *
  * @property int $id
- * @property int $task_id
- * @property string $file_path
+ * @property string $name
+ * @property string $path
+ * @property int $user_id
+ * @property string $created_at
+ * @property string $task_uid
+ * @property integer $size
  *
  * @property Tasks $task
+ * @property User $user
  */
-class Files extends \yii\db\ActiveRecord
+class Files extends ActiveRecord
 {
     /**
-     * {@inheritdoc}
+     * @var UploadedFile
      */
-    public static function tableName()
+    public UploadedFile $file;
+
+    /**
+     * {}
+     */
+    public static function tableName(): string
     {
         return 'files';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function behaviors(): array
     {
         return [
-            [['task_id', 'file_path'], 'required'],
-            [['task_id'], 'integer'],
-            [['file_path'], 'string', 'max' => 320],
-            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tasks::className(), 'targetAttribute' => ['task_id' => 'id']],
+            [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'user_id',
+                'updatedByAttribute' => null
+            ]
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function rules(): array
+    {
+        return [
+            [['file'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg'],
+            [['name', 'path', 'task_uid'], 'required'],
+            [['created_at'], 'safe'],
+            [['name'], 'string', 'max' => 128],
+            [['path'], 'string', 'max' => 320],
+            [['path'], 'unique'],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
-            'task_id' => 'Task ID',
-            'file_path' => 'File Path',
+            'name' => 'Имя',
+            'path' => 'Путь',
+            'user_id' => 'Идентификатор пользователя',
+            'created_at' => 'Дата создания',
         ];
+    }
+
+    public function upload(): bool
+    {
+        $this->name = $this->file->name;
+        $newname = uniqid() . '.' . $this->file->getExtension();
+        $this->path = '/uploads/' . $newname;
+        $this->size = $this->file->size;
+
+        if ($this->save()) {
+            return $this->file->saveAs('@webroot/uploads/' . $newname);
+        }
+
+        return false;
     }
 
     /**
      * Gets query for [[Task]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getTask()
+    public function getTask(): ActiveQuery
     {
-        return $this->hasOne(Tasks::className(), ['id' => 'task_id']);
+        return $this->hasOne(Tasks::class, ['uid' => 'task_uid']);
+    }
+
+    /**
+     * Gets query for [[User]].
+     *
+     * @return ActiveQuery
+     */
+    public function getUser(): ActiveQuery
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 }
