@@ -12,7 +12,7 @@ class m220901_171512_add_description_column_to_users_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('users', 'description', $this->string(320)->notNull());
+        $this->addColumn('users', 'description', $this->string(320));
     }
 
     /**

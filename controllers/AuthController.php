@@ -1,7 +1,6 @@
 <?php
 
 namespace app\controllers;
-use app\models\Auth;
 use app\models\Cities;
 use app\models\User;
 use yii\web\Controller;
@@ -33,6 +32,6 @@ class AuthController extends Controller
             }
         }
 
-        return $this->render('signup', ['model' => $user, 'cities' => $cities]);
+        return $this->render('signup', ['user' => $user, 'cities' => $cities]);
     }
 }

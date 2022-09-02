@@ -42,8 +42,8 @@ AppAsset::register($this);
             </div>
         <?php endif; ?>
     </nav>
-    <?php if (Yii::$app->controller->id !== 'auth'):
-        $user = Yii::$app->user->identity; ?>
+    <?php $user = Yii::$app->user->identity;
+        if (Yii::$app->controller->id !== 'auth' && $user): ?>
         <div class="user-block">
             <?php if ($user->avatar_path): ?>
                 <a href="#">

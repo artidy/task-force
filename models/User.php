@@ -18,7 +18,7 @@ use yii\web\UploadedFile;
  * @property string $password
  * @property string $name
  * @property int $is_performer
- * @property string $description
+ * @property string|null $description
  * @property int $city_id
  * @property string|null $avatar_path
  * @property string|null $birthday
@@ -36,16 +36,16 @@ use yii\web\UploadedFile;
  */
 class User extends BasedUser
 {
-    public string $password_repeat;
+    public string $password_repeat = '';
 
-    public string $old_password;
-    public string $new_password;
-    public string $new_password_repeat;
+    public string $old_password = '';
+    public string $new_password = '';
+    public string $new_password_repeat = '';
 
     /**
-     * @var UploadedFile
+     * @var ?UploadedFile
      */
-    public $avatarFile;
+    public ?UploadedFile $avatarFile = null;
 
     /**
      * {}
@@ -74,7 +74,6 @@ class User extends BasedUser
             [['phone_number'], 'match', 'pattern' => '/^[+-]?\d{11}$/', 'message' => 'Номер телефона должен быть строкой в 11 символов'],
             [['email', 'name'], 'string', 'max' => 255],
             [['description'], 'string'],
-            ['old_password', 'newPasswordValidation'],
             [['phone_number'], 'number'],
             [['password', 'telegram'], 'string', 'max' => 64],
             [['email'], 'unique'],
@@ -102,6 +101,10 @@ class User extends BasedUser
             'city_id' => 'Местоположение',
             'registered_at' => 'Дата регистрации',
             'hide_contacts' => 'Показывать контакты только заказчику',
+            'old_password' => 'Старый пароль',
+            'new_password' => 'Новый пароль',
+            'password_repeat' => 'Повтор пароля',
+            'new_password_repeat' => 'Повтор пароля',
         ];
     }
 

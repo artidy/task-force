@@ -20,7 +20,7 @@ $this->title = 'Регистрация пользователя';
             <?= $form->field($user, 'name'); ?>
             <div class="half-wrapper">
                 <?= $form->field($user, 'email'); ?>
-                <?= $form->field($user, 'city_id')->dropDownList(array_column($cities, 'name', 'id')); ?>
+                <?= $form->field($user, 'city_id')->dropDownList(array_column($cities, 'title', 'id')); ?>
             </div>
             <div class="half-wrapper">
                 <?= $form->field($user, 'password')->passwordInput(); ?>
