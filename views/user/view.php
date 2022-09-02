@@ -47,8 +47,9 @@ $this->title = 'Профиль пользователя';
         </div>
         <div class="bio">
             <p class="head-info">Био</p>
-            <p class="bio-info"><span class="country-info">Россия</span>,
-                <span class="town-info">Гамбург</span>
+            <p class="bio-info">
+                <span class="country-info">Россия</span>,
+                <span class="town-info"><?= Html::encode($user->city->title) ?></span>
                 <?php if ($user->birthday): ?>,
                     <span class="age-info"><?=$user->getAge(); ?></span> лет
                 <?php endif; ?>
@@ -106,7 +107,7 @@ $this->title = 'Профиль пользователя';
             <?php endif ?>
         </dl>
     </div>
-    <?php if ($user->isContactsAllowed()): ?>
+    <?php if ($user->isContactsAllowed(Yii::$app->user->getIdentity())): ?>
         <div class="right-card white">
             <h4 class="head-card">Контакты</h4>
             <ul class="enumeration-list">
