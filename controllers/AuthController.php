@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 use app\models\Cities;
+use app\models\LoginForm;
 use app\models\User;
 use yii\web\Controller;
 use Yii;
@@ -33,5 +34,33 @@ class AuthController extends Controller
         }
 
         return $this->render('signup', ['user' => $user, 'cities' => $cities]);
+    }
+
+    public function actionLogin()
+    {
+        $loginForm = new LoginForm();
+
+        if (Yii::$app->request->getIsPost()) {
+            $loginForm->load(Yii::$app->request->post());
+
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return ActiveForm::validate($loginForm);
+            }
+
+            if ($loginForm->validate()) {
+                Yii::$app->user->login($loginForm->getUser());
+
+                return $this->goHome();
+            }
+        }
+    }
+
+    public function actionLogout(): Response
+    {
+        Yii::$app->user->logout();
+
+        return $this->goHome();
     }
 }

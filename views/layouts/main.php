@@ -16,7 +16,7 @@ AppAsset::register($this);
     <meta charset="<?= Yii::$app->charset ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= Html::encode($this->title) ?></title>
+    <title><?= Html::encode($this->title); ?></title>
     <?php $this->head() ?>
 </head>
 <body>
@@ -24,7 +24,7 @@ AppAsset::register($this);
 <header class="page-header">
     <nav class="main-nav">
         <a href='/' class="header-logo">
-            <img class="logo-image" src="img/logotype.png" width=227 height=60 alt="taskforce">
+            <img class="logo-image" src="/img/logotype.png" width=227 height=60 alt="taskforce">
         </a>
         <?php if (Yii::$app->controller->id !== 'auth'): ?>
             <div class="nav-wrapper">
@@ -49,7 +49,7 @@ AppAsset::register($this);
                 <a href="#">
                     <img
                         class="user-photo"
-                        src="<?= 'assets/img/' . Html::encode($user->avatar_path); ?>"
+                        src="<?= '/assets/img/' . Html::encode($user->avatar_path); ?>"
                         width="55"
                         height="55"
                         alt="Аватар"

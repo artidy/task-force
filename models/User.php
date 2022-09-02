@@ -155,7 +155,7 @@ class User extends BasedUser
      */
     public function getCity(): ActiveQuery
     {
-        return $this->hasOne(Cities::class, ['city_id' => 'id']);
+        return $this->hasOne(Cities::class, ['id' => 'city_id']);
     }
 
     /**

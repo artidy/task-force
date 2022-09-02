@@ -19,7 +19,7 @@ $this->title = 'Профиль пользователя';
         <div class="photo-rate">
             <img
                 class="card-photo"
-                src="<?= "assets/img/" . Html::encode($user->avatar_path); ?>"
+                src="<?= "/assets/img/" . Html::encode($user->avatar_path); ?>"
                 width="191"
                 alt="Фото пользователя"
             >
@@ -63,7 +63,7 @@ $this->title = 'Профиль пользователя';
             <div class="response-card">
                 <img
                     class="customer-photo"
-                    src="<?= "assets/img/" . Html::encode($review->reviewer->avatar_path); ?>"
+                    src="<?= "/assets/img/" . Html::encode($review->reviewer->avatar_path); ?>"
                     width="120"
                     height="127"
                     alt="Аватар заказчика"
