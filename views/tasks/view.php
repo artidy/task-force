@@ -53,10 +53,16 @@ $user = Yii::$app->user->getIdentity();
                 <p class="info-text"><?= Yii::$app->formatter->asRelativeTime($reply->created_at); ?></p>
                 <p class="price price--small"><?= Html::encode($reply->price); ?> ₽</p>
             </div>
-            <div class="button-popup">
-                <a href="#" class="button button--blue button--small">Принять</a>
-                <a href="#" class="button button--orange button--small">Отказать</a>
-            </div>
+            <?php if ($user->id === $task->client_id && !$reply->is_accept && !$reply->is_denied): ?>
+                <div class="button-popup">
+                    <a
+                        href="<?= Url::to(['reply/approve', 'id' => $reply->id]); ?>"
+                        class="button button--blue button--small">Принять</a>
+                    <a
+                        href="<?= Url::to(['reply/deny', 'id' => $reply->id]); ?>"
+                        class="button button--orange button--small">Отказать</a>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endforeach; ?>
 </div>
