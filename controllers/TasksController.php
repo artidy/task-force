@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Categories;
+use app\models\Cities;
 use app\models\Reply;
 use app\models\Reviews;
 use app\models\Tasks;
@@ -42,5 +43,29 @@ class TasksController extends SecuredController
         $reviews = new Reviews;
 
         return $this->render('view', ['task' => $task, 'newReply' => $reply, 'reviews' => $reviews]);
+    }
+
+    public function actionCreate()
+    {
+        $task = new Tasks();
+        $categories = Categories::find()->all();
+        $cities = Cities::find()->all();
+
+        if (!Yii::$app->session->has('task_uid')) {
+            Yii::$app->session->set('task_uid', uniqid('upload'));
+        }
+
+        if (Yii::$app->request->isPost) {
+            $task->load(Yii::$app->request->post());
+            $task->uid = Yii::$app->session->get('task_uid');
+            $task->save();
+
+            if ($task->id) {
+                Yii::$app->session->remove('task_uid');
+                return $this->redirect(['tasks/view', 'id' => $task->id]);
+            }
+        }
+
+        return $this->render('create', ['task' => $task, 'categories' => $categories, 'cities' => $cities]);
     }
 }
