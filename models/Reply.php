@@ -35,7 +35,7 @@ class Reply extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['task_id', 'user_id', 'price', 'message'], 'required'],
+            [['price', 'message'], 'required'],
             [['task_id', 'user_id', 'price', 'is_accept', 'is_denied'], 'integer'],
             [['created_at'], 'safe'],
             [['message'], 'string', 'max' => 320],

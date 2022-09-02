@@ -21,7 +21,10 @@ class ReplyController extends SecuredController
         $task = $this->findOrDie($task, Tasks::class);
 
         if (Yii::$app->request->isPost) {
+            $user = $this->getUser();
             $reply = new Reply();
+            $reply->user_id = $user->id;
+            $reply->task_id = $task->id;
             $reply->load(Yii::$app->request->post());
 
             if ($reply->validate()) {
