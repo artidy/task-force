@@ -24,7 +24,7 @@ AppAsset::register($this);
 <header class="page-header">
     <nav class="main-nav">
         <a href='/' class="header-logo">
-            <img class="logo-image" src="img/logotype.png" width=227 height=60 alt="taskforce">
+            <img class="logo-image" src="/img/logotype.png" width=227 height=60 alt="taskforce">
         </a>
         <?php if (Yii::$app->controller->id !== 'auth'): ?>
             <div class="nav-wrapper">
@@ -49,7 +49,7 @@ AppAsset::register($this);
                 <a href="#">
                     <img
                         class="user-photo"
-                        src="<?= 'assets/img/' . Html::encode($user->avatar_path); ?>"
+                        src="<?= '/assets/img/' . Html::encode($user->avatar_path); ?>"
                         width="55"
                         height="55"
                         alt="Аватар"

@@ -31,7 +31,7 @@ $user = Yii::$app->user->getIdentity();
         <div class="response-card">
             <img
                 class="customer-photo"
-                src="<?= "assets/img/" . Html::encode($reply->user->avatar_path); ?>"
+                src="<?= "/assets/img/" . Html::encode($reply->user->avatar_path); ?>"
                 width="146"
                 height="156"
                 alt="Фото заказчиков"

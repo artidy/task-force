@@ -40,7 +40,7 @@ class SiteController extends Controller
     {
         $this->layout = '//landing';
 
-        return $this->render('index', ['model' => new LoginForm()]);
+        return $this->render('index', ['user' => new LoginForm()]);
     }
 
 }
