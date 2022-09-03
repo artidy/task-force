@@ -6,6 +6,7 @@
  * @var $review Reviews
  */
 
+use app\assets\YandexAsset;
 use app\helpers\UIHelper;
 use app\models\Reply;
 use app\models\Reviews;
@@ -20,6 +21,7 @@ use yii\widgets\ActiveForm;
 use function morphos\Russian\pluralize;
 
 $user = Yii::$app->user->getIdentity();
+YandexAsset::register($this);
 ?>
 
 <div class="left-column">
@@ -32,6 +34,33 @@ $user = Yii::$app->user->getIdentity();
             echo $button;
         }
     ?>
+    <?php if ($task->location): ?>
+        <div class="task-map">
+            <div class="map" id="map"></div>
+            <p class="map-address town"><?= Html::encode($task->city->title); ?></p>
+            <p class="map-address"><?= Html::encode($task->location); ?></p>
+        </div>
+    <?php
+        $lat = $task->lat;
+        $long = $task->long;
+        $this->registerJs(<<<JS
+            ymaps.ready(init);
+            function init(){
+                var myMap = new ymaps.Map("map", {
+                    center: ["$lat", "$long"],
+                    zoom: 16
+                });
+                
+                myMap.controls.remove('trafficControl');
+                myMap.controls.remove('searchControl');
+                myMap.controls.remove('geolocationControl');
+                myMap.controls.remove('typeSelector');
+                myMap.controls.remove('fullscreenControl');
+                myMap.controls.remove('rulerControl');
+            }
+        JS, View::POS_READY);
+
+    endif; ?>
     <h4 class="head-regular">Отклики на задание</h4>
     <?php $replies = $task->getReplies($user)->all();
     foreach ($replies as $reply): ?>

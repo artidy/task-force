@@ -26,8 +26,7 @@ DropzoneAsset::register($this);
     <?= $form->field($task, 'description')->textarea(); ?>
     <?= $form->field($task, 'category_id')->dropDownList(array_column($categories, 'title', 'id'),
         ['prompt' => 'Выбрать категорию']); ?>
-    <?= $form->field($task, 'location_id')->dropDownList(array_column($cities, 'title', 'id'),
-        ['prompt' => 'Выбрать город']); ?>
+    <?= $form->field($task, 'location'); ?>
     <div class="half-wrapper">
         <?= $form->field($task, 'budget')->input('text', ['class' => 'budget-icon']); ?>
         <?= $form->field($task, 'deadline')->input('date'); ?>

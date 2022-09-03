@@ -20,8 +20,8 @@ use yii\helpers\Url;
     <p class="task-text"><?= Html::encode(BaseStringHelper::truncate($task->description, 200)); ?>
     </p>
     <div class="footer-task">
-        <?php if ($task->location): ?>
-            <p class="info-text town-text"><?= Html::encode($task->location->title); ?></p>
+        <?php if ($task->city): ?>
+            <p class="info-text town-text"><?= Html::encode($task->city->title); ?></p>
         <?php endif ?>
         <p class="info-text category-text"><?= Html::encode($task->category->title); ?></p>
         <a href="<?=Url::toRoute(['tasks/view', 'id' => $task->id]); ?>" class="button button--black">Смотреть Задание</a>
