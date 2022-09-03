@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use AndreyPechennikov\TaskForce\logic\actions\CancelAction;
 use AndreyPechennikov\TaskForce\logic\actions\DenyAction;
+use app\helpers\UIHelper;
 use app\models\Categories;
 use app\models\Cities;
 use app\models\Files;
@@ -11,6 +12,7 @@ use app\models\Reply;
 use app\models\Reviews;
 use app\models\Tasks;
 use app\models\User;
+use Throwable;
 use Yii;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
@@ -73,6 +75,22 @@ class TasksController extends SecuredController
         }
 
         return $this->render('create', ['task' => $task, 'categories' => $categories, 'cities' => $cities]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function actionMy($status = null): string
+    {
+        $menuItems = UIHelper::getMyTasksMenu($this->getUser()->is_performer);
+
+        if (!$status) {
+            $this->redirect($menuItems[0]['url']);
+        }
+
+        $tasks = $this->getUser()->getTasksByStatus($status)->all();
+
+        return $this->render('my', ['menuItems' => $menuItems, 'tasks' => $tasks]);
     }
 
     public function actionUpload()

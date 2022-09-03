@@ -105,6 +105,7 @@ class User extends BasedUser
             'new_password' => 'Новый пароль',
             'password_repeat' => 'Повтор пароля',
             'new_password_repeat' => 'Повтор пароля',
+            'userSpecializations' => 'Специализации пользователя'
         ];
     }
 
@@ -231,7 +232,7 @@ class User extends BasedUser
             where(['statuses.id' => Statuses::STATUS_IN_PROGRESS])->exists();
     }
 
-    public function isContactsAllowed(IdentityInterface $user)
+    public function isContactsAllowed(IdentityInterface $user): bool
     {
         $result = true;
 
@@ -240,6 +241,33 @@ class User extends BasedUser
         }
 
         return $result;
+    }
+
+    public function getTasksByStatus($status): ActiveQuery
+    {
+        $user_type = $this->is_performer ? 'performer_id' : 'client_id';
+        $query = Tasks::find();
+        $query->joinWith('status s');
+
+        switch ($status) {
+            case 'new':
+                $query->where(['s.code' => Statuses::STATUS_NEW]);
+                break;
+            case 'close':
+                $query->where(['s.code' => [Statuses::STATUS_COMPLETE, Statuses::STATUS_EXPIRED, Statuses::STATUS_CANCEL]]);
+                break;
+            case 'in_progress':
+                $query->where(['s.code' => Statuses::STATUS_IN_PROGRESS]);
+                break;
+            case 'expired':
+                $query->where(['s.code' => Statuses::STATUS_IN_PROGRESS])
+                    ->andWhere(['<', 'deadline', date('Y-m-d')]);
+                break;
+        }
+
+        $query->andWhere("$user_type = :user_id", [':user_id' => $this->id]);
+
+        return $query;
     }
 
     public function addCanceledTask(int $task_id, string $description)
