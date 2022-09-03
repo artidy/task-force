@@ -242,6 +242,33 @@ class User extends BasedUser
         return $result;
     }
 
+    public function getTasksByStatus($status): ActiveQuery
+    {
+        $user_type = $this->is_performer ? 'performer_id' : 'client_id';
+        $query = Tasks::find();
+        $query->joinWith('status s');
+
+        switch ($status) {
+            case 'new':
+                $query->where(['s.code' => Statuses::STATUS_NEW]);
+                break;
+            case 'close':
+                $query->where(['s.code' => [Statuses::STATUS_COMPLETE, Statuses::STATUS_EXPIRED, Statuses::STATUS_CANCEL]]);
+                break;
+            case 'in_progress':
+                $query->where(['s.code' => Statuses::STATUS_IN_PROGRESS]);
+                break;
+            case 'expired':
+                $query->where(['s.code' => Statuses::STATUS_IN_PROGRESS])
+                    ->andWhere(['<', 'deadline', date('Y-m-d')]);
+                break;
+        }
+
+        $query->andWhere("$user_type = :user_id", [':user_id' => $this->id]);
+
+        return $query;
+    }
+
     public function addCanceledTask(int $task_id, string $description)
     {
         $canceledTask = new CanceledTasks();
