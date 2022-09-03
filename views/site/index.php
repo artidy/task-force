@@ -6,7 +6,7 @@
  */
 
 use app\models\LoginForm;
-use yii\web\View;
+use yii\authclient\widgets\AuthChoice;use yii\web\View;
 use yii\widgets\ActiveForm;
 
 $this->title = 'Task Force';
@@ -20,5 +20,9 @@ $this->title = 'Task Force';
         'inputOptions' => ['class' => 'enter-form-email input input-middle']])->passwordInput(); ?>
     <button class="button" type="submit">Войти</button>
     <?php ActiveForm::end(); ?>
+    <?= AuthChoice::widget([
+        'baseAuthUrl' => ['auth/vk'],
+        'popupMode' => false,
+    ]); ?>
     <button class="form-modal-close" type="button">Закрыть</button>
 </section>

@@ -18,6 +18,17 @@ $config = [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'U-VyVMu2wvpMvEC05b4zLB6BDldYAIBM',
         ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'vk' => [
+                    'class' => 'yii\authclient\clients\VKontakte',
+                    'clientId' => $params['vkid'],
+                    'scope' => 'email',
+                    'clientSecret' => getenv('VK_SECRET'),
+                ],
+            ],
+        ],
         'inflection' => [
             'class' => 'wapmorgan\yii2inflection\Inflection',
         ],

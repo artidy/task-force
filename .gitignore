@@ -36,4 +36,4 @@ tests/_support/_generated
 /.vagrant
 
 #environment variables
-.env
+web/.env
