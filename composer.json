@@ -26,7 +26,7 @@
         "wapmorgan/yii2-inflection": "^1.0",
         "ext-pdo": "*",
         "yiisoft/yii2-authclient": "^2.2",
-        "ext-http": "*"
+        "yandex/geo": "^1.2"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

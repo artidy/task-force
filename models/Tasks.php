@@ -4,6 +4,8 @@ namespace app\models;
 
 use AndreyPechennikov\TaskForce\logic\actions\AbstractAction;
 use AndreyPechennikov\TaskForce\logic\AvailableActions;
+use app\helpers\YandexMapHelper;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -18,7 +20,10 @@ use yii\web\IdentityInterface;
  * @property int $category_id
  * @property int $client_id
  * @property int|null $performer_id
- * @property int|null $location_id
+ * @property string|null $location
+ * @property int|null city_id
+ * @property float|null lat
+ * @property float|null long
  * @property int|null $budget
  * @property string|null $deadline
  * @property int $status_id
@@ -29,7 +34,7 @@ use yii\web\IdentityInterface;
  * @property Categories $category
  * @property User $client
  * @property Files[] $files
- * @property Cities $location
+ * @property Cities $city
  * @property User $performer
  * @property Reviews[] $reviews
  * @property Statuses $status
@@ -68,12 +73,20 @@ class Tasks extends ActiveRecord
             [['status_id'], 'default', 'value' => function($model, $attr) {
                 return Statuses::find()->select('id')->where('id=1')->scalar();
             }],
+            [['city_id'], 'default', 'value' => function($model, $attr) {
+                if ($model->location) {
+                    return Yii::$app->user->getIdentity()->city_id;
+                }
+
+                return null;
+            }],
             [['title', 'description', 'category_id', 'status_id'], 'required'],
-            [['category_id', 'performer_id', 'location_id', 'budget', 'status_id'], 'integer'],
+            [['category_id', 'performer_id', 'city_id', 'budget', 'status_id'], 'integer'],
             [['deadline', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 128],
             [['budget'], 'integer', 'min' => 1],
             [['description'], 'string', 'max' => 320],
+            [['location'], 'string', 'max' => 255],
             [['uid'], 'string', 'max' => 64],
             [['noResponses', 'noLocation'], 'boolean'],
             [['filterPeriod'], 'number'],
@@ -81,7 +94,6 @@ class Tasks extends ActiveRecord
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Statuses::class, 'targetAttribute' => ['status_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
             [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
-            [['location_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cities::class, 'targetAttribute' => ['location_id' => 'id']],
         ];
     }
 
@@ -97,12 +109,13 @@ class Tasks extends ActiveRecord
             'category_id' => 'Категория',
             'client_id' => 'Клиент',
             'performer_id' => 'Роль',
-            'location_id' => 'Местоположение',
+            'city_id' => 'Город',
+            'location' => 'Место',
             'budget' => 'Бюджет',
             'deadline' => 'Дедлайн',
             'status_id' => 'Статус',
             'created_at' => 'Дата создания',
-            'noLocation' => 'Без локации',
+            'noLocation' => 'Удаленная работа',
             'noResponses' => 'Без откликов',
         ];
     }
@@ -115,7 +128,7 @@ class Tasks extends ActiveRecord
         $query->andFilterWhere(['category_id' => $this->category_id]);
 
         if ($this->noLocation) {
-            $query->andWhere('location_id IS NULL');
+            $query->andWhere('location IS NULL');
         }
 
         if ($this->noResponses) {
@@ -173,13 +186,13 @@ class Tasks extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Location]].
+     * Gets query for [[City]].
      *
      * @return ActiveQuery
      */
-    public function getLocation(): ActiveQuery
+    public function getCity(): ActiveQuery
     {
-        return $this->hasOne(Cities::class, ['id' => 'location_id']);
+        return $this->hasOne(Cities::class, ['id' => 'city_id']);
     }
 
     /**
@@ -237,5 +250,24 @@ class Tasks extends ActiveRecord
         $status = Statuses::findOne(['code' => $nextStatusName]);
         $this->link('status', $status);
         $this->save();
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($this->location) {
+            $yandexHelper = new YandexMapHelper(getenv('YANDEX_API_KEY'));
+            $coords = $yandexHelper->getCoordinates($this->city->title, $this->location);
+
+            if ($coords) {
+                [$lat, $long] = $coords;
+
+                $this->lat = $lat;
+                $this->long = $long;
+            }
+        }
+
+        parent::beforeSave($insert);
+
+        return true;
     }
 }
