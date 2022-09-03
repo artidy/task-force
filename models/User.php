@@ -105,6 +105,7 @@ class User extends BasedUser
             'new_password' => 'Новый пароль',
             'password_repeat' => 'Повтор пароля',
             'new_password_repeat' => 'Повтор пароля',
+            'userSpecializations' => 'Специализации пользователя'
         ];
     }
 
@@ -231,7 +232,7 @@ class User extends BasedUser
             where(['statuses.id' => Statuses::STATUS_IN_PROGRESS])->exists();
     }
 
-    public function isContactsAllowed(IdentityInterface $user)
+    public function isContactsAllowed(IdentityInterface $user): bool
     {
         $result = true;
 
